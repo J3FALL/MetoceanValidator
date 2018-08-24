@@ -32,3 +32,7 @@ class NameFormat:
         except Exception as exc:
             error = "%s doesn't correspond to name format of %s" % (name, type)
             raise RuntimeError(error, exc)
+
+    def format(self, date, type):
+        return str.join("", [self._formats[type]['prefix'], date.strftime(self._formats['date']),
+                             "-", date.strftime(self._formats['date']), self._formats[type]['suffix']])

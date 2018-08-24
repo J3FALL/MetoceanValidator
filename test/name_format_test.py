@@ -1,9 +1,10 @@
 import unittest
+from datetime import date
 
-from src.matching import NameFormat
+from src.name_format import NameFormat
 
 
-class NameMatchingTest(unittest.TestCase):
+class NameFormatTest(unittest.TestCase):
 
     def test_matching_correct(self):
         nf = NameFormat()
@@ -32,3 +33,11 @@ class NameMatchingTest(unittest.TestCase):
             nf.match(diff_dates, "ice")
         with self.assertRaises(RuntimeError):
             nf.match(incorrect_name, "ice")
+
+    def test_format_correct(self):
+        nf = NameFormat()
+
+        source_date = date(2013, 1, 15)
+        formatted_date = "ARCTIC_1h_ice_grid_TUV_20130115-20130115.nc"
+
+        self.assertEqual(nf.format(source_date, "ice"), formatted_date)
