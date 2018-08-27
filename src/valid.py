@@ -1,5 +1,5 @@
 from datetime import timedelta
-
+from src.experiment import ExperimentDay
 from src.name_format import NameFormat
 
 
@@ -16,8 +16,9 @@ class ValidResults:
 
         results = []
         for date in self.date_range(from_date, to_date):
-            results.append([self.name_format.format(date, 'ice'), self.name_format.format(date, 'tracers'),
-                            self.name_format.format(date, 'currents')])
+            results.append(ExperimentDay(date=date, ice_file=self.name_format.format(date, 'ice'),
+                                         tracers_file=self.name_format.format(date, 'tracers'),
+                                         currents_file=self.name_format.format(date, 'currents')))
 
         return results
 
