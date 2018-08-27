@@ -26,7 +26,4 @@ class ValidResultsTest(unittest.TestCase):
         all_results = results.generate(date_from, date_to)
 
         for expected, real in zip(expected_results, all_results):
-            self.assertEqual(expected.date, real.date)
-            self.assertEqual(expected.ice_file, real.ice_file)
-            self.assertEqual(expected.tracers_file, real.tracers_file)
-            self.assertEqual(expected.currents_file, real.currents_file)
+            self.assertEqual(expected, real)
