@@ -1,5 +1,6 @@
 from datetime import timedelta
-from src.experiment import ExperimentDay
+
+from src.day import ExperimentDay
 from src.name_format import NameFormat
 
 

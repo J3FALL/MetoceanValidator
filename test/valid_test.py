@@ -1,7 +1,7 @@
 import unittest
 from datetime import date
 
-from src.experiment import ExperimentDay
+from src.day import ExperimentDay
 from src.valid import ValidResults
 
 
