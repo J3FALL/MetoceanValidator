@@ -22,7 +22,8 @@ class Experiment:
                 error = "Simulation results were not found for day: %s" % valid.date.strftime("%Y%m%d")
                 raise Exception(error)
             elif valid != given:
-                error = "Simulation results for day: %s have some missing files or its names are incorrect: %s" % given
+                error = "Simulation results for day: %s have some missing files or its names are incorrect: %s" % \
+                        (valid.date.strftime("%Y%m%d"), given)
                 raise Exception(error)
 
         return False
