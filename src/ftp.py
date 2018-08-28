@@ -1,9 +1,13 @@
+import ftplib
+
 import yaml
 
 
 class FtpStorage:
     def __init__(self):
+        self.storages = self.init_storages()
         self.dirs = self.init_directories()
+        self.credentials = self.init_credentials()
 
     def init_directories(self):
         '''
@@ -16,6 +20,14 @@ class FtpStorage:
             dirs.append(Directory(dir['year'], dir['storage_ip'], dir['path']))
 
         return dirs
+
+    def init_storages(self):
+        config = self.load_config()
+        return [storage for storage in config['storages']]
+
+    def init_credentials(self):
+        config = self.load_config()
+        return config['credentials']
 
     def load_config(self):
         '''
@@ -31,9 +43,23 @@ class FtpStorage:
 
     def get_results(self):
         '''
-
         :return: List of all simulation results
         '''
+        connects = dict()
+        for storage in self.storages:
+            connects[storage] = ftplib.FTP(host=storage, user=self.credentials['user'], passwd=self.credentials['pass'])
+
+        files = []
+        for dir in self.dirs:
+            print("year: %s" % dir.year)
+            connect = connects[dir.ip]
+            try:
+                connect.cwd(dir.path)
+                files.append(connect.nlst())
+            except Exception:
+                print("error has occurred")
+
+        return files
 
 
 class Directory:
@@ -44,3 +70,4 @@ class Directory:
 
 
 storage = FtpStorage()
+storage.get_results()
