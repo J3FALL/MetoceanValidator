@@ -16,15 +16,15 @@ class NameFormat:
                 print(exc)
 
     def match_type(self, name):
-        # TODO: refactor to exceptions logic
         for type in self._formats.keys():
             try:
                 self.match(name, type)
                 return type
             except Exception:
-                print("cannot be matched as %s" % type)
+                continue
 
-        return ""
+        error = "%s has no matching type" % name
+        raise Exception(error)
 
     def match(self, name, type):
         '''
