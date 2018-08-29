@@ -6,6 +6,7 @@ files = storage.get_results()
 
 nf = NameFormat()
 
-for file in files[0]:
-    print(file)
-    print(nf.match_type(file))
+for year in files:
+    for file in year:
+        print(file)
+        print(nf.match_type(file))
