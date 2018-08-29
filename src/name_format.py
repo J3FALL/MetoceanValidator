@@ -1,3 +1,4 @@
+import os
 import re
 
 import yaml
@@ -8,7 +9,7 @@ class NameFormat:
         self._formats = self.load_formats()
 
     def load_formats(self):
-        with open("../formats.yaml", 'r') as stream:
+        with open(os.path.join(os.path.dirname(__file__), "../formats.yaml"), 'r') as stream:
             try:
                 loaded = yaml.load(stream)
                 return loaded
