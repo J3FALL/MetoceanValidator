@@ -8,6 +8,9 @@ install:
   - pip install coveralls
   - pip install pytest-cov
 
+notifications:
+  email: false
+
 script:
   - coverage run --source=. -m py.test
 
