@@ -1,5 +1,8 @@
 # nemo-error-checker
+
 A tool for finding errors in ocean simulation results by NEMO model.
+
+[![Build Status](https://travis-ci.com/J3FALL/nemo-error-checker.svg?branch=master)](https://travis-ci.com/J3FALL/nemo-error-checker)
 
 This tool is considered to be a part of Metocean Simulation Results Verification Framework. 
 The experiments are based mainly on ocean simulation results obtained with NEMO model.
