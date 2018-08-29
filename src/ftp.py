@@ -67,7 +67,3 @@ class Directory:
         self.year = year
         self.ip = ip
         self.path = path
-
-
-storage = FtpStorage()
-storage.get_results()

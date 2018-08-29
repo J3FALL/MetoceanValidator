@@ -1,17 +1,13 @@
-import itertools
+from datetime import date
 
+from src.experiment import Experiment
 from src.ftp import FtpStorage
-from src.name_format import NameFormat
 
 storage = FtpStorage()
 files = storage.get_results()
 
-nf = NameFormat()
+exp = Experiment(date_from=date(1964, 1, 1), date_to=date(2015, 12, 31), resulted_files=files)
 
-all_files = list(itertools.chain(*files))
-print(len(all_files))
+errors = exp.check_for_absence()
 
-# for year in files:
-#     for file in year:
-#         print(file)
-#         print(nf.match_type(file))
+print(errors)
