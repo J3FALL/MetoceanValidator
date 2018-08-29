@@ -10,7 +10,7 @@ class NameFormatTest(unittest.TestCase):
         nf = NameFormat()
 
         ice_file = "ARCTIC_1h_ice_grid_TUV_20130105-20130105.nc"
-        currents_file = "ARCTIC_1h_T_UV_20140306-20140306.nc"
+        currents_file = "ARCTIC_1h_UV_grid_UV_20140306-20140306.nc"
         tracers_file = "ARCTIC_1h_T_grid_T_20010203-20010203.nc"
 
         self.assertEqual(nf.match(ice_file, "ice"), "20130105")
@@ -41,3 +41,18 @@ class NameFormatTest(unittest.TestCase):
         formatted_date = "ARCTIC_1h_ice_grid_TUV_20130115-20130115.nc"
 
         self.assertEqual(nf.format(source_date, "ice"), formatted_date)
+
+    def test_match_type_correct(self):
+        nf = NameFormat()
+
+        file = "ARCTIC_1h_ice_grid_TUV_20130115-20130115.nc"
+
+        self.assertEqual(nf.match_type(file), "ice")
+
+    def test_match_type_incorrect(self):
+        nf = NameFormat()
+
+        file = "ARCTIC_1h_floor_grid_TUV_20130115-20130115.nc"
+
+        with self.assertRaises(Exception):
+            nf.match_type(file)

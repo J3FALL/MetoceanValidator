@@ -15,6 +15,17 @@ class NameFormat:
             except yaml.YAMLError as exc:
                 print(exc)
 
+    def match_type(self, name):
+        for type in self._formats.keys():
+            try:
+                self.match(name, type)
+                return type
+            except Exception:
+                continue
+
+        error = "%s has no matching type" % name
+        raise Exception(error)
+
     def match(self, name, type):
         '''
 
