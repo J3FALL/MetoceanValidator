@@ -1,13 +1,14 @@
 date: "%Y%m%d"
-ice:
-  name: "ARCTIC_1h_ice_grid_TUV_(\\d{8})-(\\d{8}).nc"
-  prefix: "ARCTIC_1h_ice_grid_TUV_"
-  suffix: ".nc"
-tracers:
-  name: "ARCTIC_1h_T_grid_T_(\\d{8})-(\\d{8}).nc"
-  prefix: "ARCTIC_1h_T_grid_T_"
-  suffix: ".nc"
-currents:
-  name: "ARCTIC_1h_UV_grid_UV_(\\d{8})-(\\d{8}).nc"
-  prefix: "ARCTIC_1h_UV_grid_UV_"
-  suffix: ".nc"
+files:
+  ice:
+    name: "ARCTIC_1h_ice_grid_TUV_(\\d{8})-(\\d{8}).nc"
+    prefix: "ARCTIC_1h_ice_grid_TUV_"
+    suffix: ".nc"
+  tracers:
+    name: "ARCTIC_1h_T_grid_T_(\\d{8})-(\\d{8}).nc"
+    prefix: "ARCTIC_1h_T_grid_T_"
+    suffix: ".nc"
+  currents:
+    name: "ARCTIC_1h_UV_grid_UV_(\\d{8})-(\\d{8}).nc"
+    prefix: "ARCTIC_1h_UV_grid_UV_"
+    suffix: ".nc"
