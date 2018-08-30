@@ -13,15 +13,16 @@ class NameFormatTest(unittest.TestCase):
         currents_file = "ARCTIC_1h_UV_grid_UV_20140306-20140306.nc"
         tracers_file = "ARCTIC_1h_T_grid_T_20010203-20010203.nc"
 
-        self.assertEqual(nf.match(ice_file, "ice"), "20130105")
-        self.assertEqual(nf.match(currents_file, "currents"), "20140306")
-        self.assertEqual(nf.match(tracers_file, "tracers"), "20010203")
+        self.assertEqual(nf.match(ice_file, "ice"), ("20130105", ""))
+        self.assertEqual(nf.match(currents_file, "currents"), ("20140306", ""))
+        self.assertEqual(nf.match(tracers_file, "tracers"), ("20010203", ""))
 
     def test_matching_wrong_type(self):
         nf = NameFormat()
         ice_file = "ARCTIC_1h_ice_grid_TUV_20130105-20130105.nc"
-        with self.assertRaises(RuntimeError):
-            nf.match(ice_file, "tracers")
+        date, error = nf.match(ice_file, "tracers")
+        self.assertEqual(date, "")
+        self.assertEqual(error, "%s doesn't correspond to name format of tracers" % ice_file)
 
     def test_matching_incorrect(self):
         nf = NameFormat()
@@ -29,10 +30,13 @@ class NameFormatTest(unittest.TestCase):
         diff_dates = "ARCTIC_1h_ice_grid_TUV_20130105-20130106.nc"
         incorrect_name = "ARCTIC_1h_ice_XXX_TUV_20130105-20130105.n"
 
-        with self.assertRaises(RuntimeError):
-            nf.match(diff_dates, "ice")
-        with self.assertRaises(RuntimeError):
-            nf.match(incorrect_name, "ice")
+        date, error = nf.match(diff_dates, "ice")
+        self.assertEqual(date, "")
+        self.assertEqual(error, "%s doesn't correspond to name format of ice" % diff_dates)
+
+        date, error = nf.match(incorrect_name, "ice")
+        self.assertEqual(date, "")
+        self.assertEqual(error, "%s doesn't correspond to name format of ice" % incorrect_name)
 
     def test_format_correct(self):
         nf = NameFormat()
@@ -47,12 +51,17 @@ class NameFormatTest(unittest.TestCase):
 
         file = "ARCTIC_1h_ice_grid_TUV_20130115-20130115.nc"
 
-        self.assertEqual(nf.match_type(file), "ice")
+        actual_type, error = nf.match_type(file)
+        self.assertEqual(error, "")
+        self.assertEqual(actual_type, "ice")
 
     def test_match_type_incorrect(self):
         nf = NameFormat()
 
         file = "ARCTIC_1h_floor_grid_TUV_20130115-20130115.nc"
 
-        with self.assertRaises(Exception):
-            nf.match_type(file)
+        actual_type, error = nf.match_type(file)
+
+        expected_error = "%s has no matching type" % file
+        self.assertEqual(error, expected_error)
+        self.assertEqual(actual_type, "")

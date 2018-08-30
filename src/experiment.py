@@ -1,5 +1,6 @@
 import datetime
 import itertools
+import logging
 
 from src.day import ExperimentDay
 from src.day import date_range
@@ -22,10 +23,14 @@ class Experiment:
         all_files = self.skip_some_trash_files(list(itertools.chain(*files)))
         nf = NameFormat()
         for file in all_files:
-            type = nf.match_type(file)
-            date = datetime.datetime.strptime(nf.match(file, type), "%Y%m%d").date()
-            day = next(sim_day for sim_day in results_by_days if sim_day.date == date)
-            setattr(day, type, file)
+            type, error = nf.match_type(file)
+            if error is "":
+                date_str, _ = nf.match(file, type)
+                date = datetime.datetime.strptime(date_str, "%Y%m%d").date()
+                day = next(sim_day for sim_day in results_by_days if sim_day.date == date)
+                setattr(day, type, file)
+            else:
+                logging.info(error)
 
         return results_by_days
 
@@ -53,10 +58,12 @@ class Experiment:
         for valid, given in zip(valid_results, self._results_by_days):
             if given.is_none():
                 error = "Simulation results were not found for day: %s" % valid.date.strftime("%Y%m%d")
+                logging.info(error)
                 errors.append(error)
             elif valid != given:
                 error = "Simulation results for day: %s have some missing files or its names are incorrect: %s" % \
                         (valid.date.strftime("%Y%m%d"), given)
+                logging.info(error)
                 errors.append(error)
 
         return errors
