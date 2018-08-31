@@ -14,7 +14,8 @@ class NCFile:
         try:
             nc_file = NetCDF(self.path)
             nc_file.close()
-        except OSError:
+        except OSError as exc:
+            print(exc)
             error = "%s can't be opened" % self.name
             logging.error(error)
 
