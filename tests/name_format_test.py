@@ -65,3 +65,10 @@ class NameFormatTest(unittest.TestCase):
         expected_error = "%s has no matching type" % file
         self.assertEqual(error, expected_error)
         self.assertEqual(actual_type, "")
+
+    def test_variables(self):
+        nf = NameFormat()
+
+        expected_vars = ['deptht', 'deptht_bounds', 'nav_lat', 'nav_lon', 'sossheig', 'vosaline', 'votemper']
+
+        self.assertListEqual(nf.variables('tracers'), expected_vars)
