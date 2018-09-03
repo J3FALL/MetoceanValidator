@@ -1,6 +1,8 @@
 import datetime
 import itertools
 import logging
+import os
+import re
 
 from src.day import ExperimentDay
 from src.day import date_range
@@ -23,7 +25,8 @@ class Experiment:
         results_by_days = self.init_blank_results()
         all_files = self.skip_some_trash_files(list(itertools.chain(*files)))
         nf = NameFormat()
-        for file_name in all_files:
+        for path in all_files:
+            file_name = self.path_leaf(path)
             type, error = nf.match_type(file_name)
             if error is "":
                 date_str, _ = nf.match(file_name, type)
@@ -31,7 +34,7 @@ class Experiment:
                 day = next(sim_day for sim_day in results_by_days if sim_day.date == date)
                 file = getattr(day, type)
                 file.name = file_name
-                # setattr(day, type, file_name)
+                file.path = path
             else:
                 logging.info(error)
 
@@ -46,9 +49,15 @@ class Experiment:
         return blank_results
 
     def skip_some_trash_files(self, files):
-        files_to_skip = ["b_gen.py", "bcondgen6.py", "create_large_net.bat", "grid.nc", "init_gen.py",
-                         "initial_fill_generated_y2013.nc", "year-log.txt"]
-        return list(filter(lambda file: file not in files_to_skip, files))
+        files_to_skip = re.compile(
+            '|'.join(["b_gen.py", "bcondgen6.py", "create_large_net.bat", "grid.nc", "init_gen.py",
+                      "initial_fill_generated_y2013.nc", "year-log.txt"]))
+
+        return list(filter(lambda file: file if files_to_skip.match(file) is None else None, files))
+
+    def path_leaf(self, path):
+        head, tail = os.path.split(path)
+        return tail
 
     def check_for_absence(self):
         '''

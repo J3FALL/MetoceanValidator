@@ -28,9 +28,5 @@ class BladeChecker:
     def get_all_netcdf_files(self):
         files = []
         for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
-            files.append(self.path_leaf(file_name))
+            files.append(file_name)
         return files
-
-    def path_leaf(self, path):
-        head, tail = os.path.split(path)
-        return tail
