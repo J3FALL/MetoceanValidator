@@ -81,3 +81,34 @@ class Experiment:
                 errors.append(error)
 
         return errors
+
+    def check_for_integrity(self):
+        errors = []
+        for day in self._results_by_days:
+            print("Integrity check for: %s" % day)
+            errors_for_day = [day.ice.check_for_integrity(),
+                              day.tracers.check_for_integrity(),
+                              day.currents.check_for_integrity()]
+            total = self._errors_in_total(errors_for_day)
+            errors.append(total)
+            for error in total:
+                logging.error(error)
+
+        return errors
+
+    def check_oceanic_variables(self):
+        errors = []
+        for day in self._results_by_days:
+            print("Variables check for: %s" % day)
+            errors_for_day = [day.ice.check_variables(),
+                              day.tracers.check_variables(),
+                              day.currents.check_variables()]
+            total = self._errors_in_total(errors_for_day)
+            errors.append(total)
+            for error in total:
+                logging.error(error)
+
+        return errors
+
+    def _errors_in_total(self, errors_for_day):
+        return list(filter(lambda error: error if error is not "" else None, errors_for_day))

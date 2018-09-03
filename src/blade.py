@@ -15,12 +15,19 @@ class BladeChecker:
     def init_logging(self):
         logging.basicConfig(filename='../logs/errors.log', level=logging.INFO)
 
-    def check_local_storage(self):
+    def check_local_storage(self, mode="absence"):
         logging.info('Started')
         files = self.get_all_netcdf_files()
         print("files amount : %d" % len(files))
         exp = Experiment(date_from=self._date_from, date_to=self._date_to, resulted_files=[files])
-        errors = exp.check_for_absence()
+
+        if mode == "absence":
+            errors = exp.check_for_absence()
+        if mode == "integrity":
+            errors = exp.check_for_integrity()
+        if mode == "vars":
+            errors = exp.check_oceanic_variables()
+
         logging.info('Finished')
 
         return errors

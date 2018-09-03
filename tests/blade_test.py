@@ -20,5 +20,5 @@ class BladeTest(unittest.TestCase):
         self.checker = BladeChecker(date_from=date(2013, 1, 1), date_to=date(2013, 1, 3))
 
     @patch('src.blade.BladeChecker.get_all_netcdf_files', return_value=mocked_nc_files)
-    def test_check_local_storage_correct(self, _):
-        self.assertEqual(len(self.checker.check_local_storage()), 0)
+    def test_check_local_storage_for_absence_correct(self, _):
+        self.assertEqual(len(self.checker.check_local_storage(mode="absence")), 0)
