@@ -5,6 +5,7 @@ import logging
 from src.day import ExperimentDay
 from src.day import date_range
 from src.name_format import NameFormat
+from src.netcdf import NCFile
 from src.valid import ValidResults
 
 
@@ -22,13 +23,15 @@ class Experiment:
         results_by_days = self.init_blank_results()
         all_files = self.skip_some_trash_files(list(itertools.chain(*files)))
         nf = NameFormat()
-        for file in all_files:
-            type, error = nf.match_type(file)
+        for file_name in all_files:
+            type, error = nf.match_type(file_name)
             if error is "":
-                date_str, _ = nf.match(file, type)
+                date_str, _ = nf.match(file_name, type)
                 date = datetime.datetime.strptime(date_str, "%Y%m%d").date()
                 day = next(sim_day for sim_day in results_by_days if sim_day.date == date)
-                setattr(day, type, file)
+                file = getattr(day, type)
+                file.name = file_name
+                # setattr(day, type, file_name)
             else:
                 logging.info(error)
 
@@ -37,7 +40,9 @@ class Experiment:
     def init_blank_results(self):
         blank_results = []
         for date in date_range(self._date_from, self._date_to):
-            blank_results.append(ExperimentDay(date))
+            blank_results.append(ExperimentDay(date=date, ice_file=NCFile(name="", path="", type="ice"),
+                                               tracers_file=NCFile(name="", path="", type="tracers"),
+                                               currents_file=NCFile(name="", path="", type="currents")))
         return blank_results
 
     def skip_some_trash_files(self, files):
