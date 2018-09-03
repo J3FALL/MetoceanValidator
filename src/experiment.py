@@ -1,10 +1,13 @@
 import datetime
 import itertools
 import logging
+import os
+import re
 
 from src.day import ExperimentDay
 from src.day import date_range
 from src.name_format import NameFormat
+from src.netcdf import NCFile
 from src.valid import ValidResults
 
 
@@ -22,13 +25,16 @@ class Experiment:
         results_by_days = self.init_blank_results()
         all_files = self.skip_some_trash_files(list(itertools.chain(*files)))
         nf = NameFormat()
-        for file in all_files:
-            type, error = nf.match_type(file)
+        for path in all_files:
+            file_name = self.path_leaf(path)
+            type, error = nf.match_type(file_name)
             if error is "":
-                date_str, _ = nf.match(file, type)
+                date_str, _ = nf.match(file_name, type)
                 date = datetime.datetime.strptime(date_str, "%Y%m%d").date()
                 day = next(sim_day for sim_day in results_by_days if sim_day.date == date)
-                setattr(day, type, file)
+                file = getattr(day, type)
+                file.name = file_name
+                file.path = path
             else:
                 logging.info(error)
 
@@ -37,13 +43,21 @@ class Experiment:
     def init_blank_results(self):
         blank_results = []
         for date in date_range(self._date_from, self._date_to):
-            blank_results.append(ExperimentDay(date))
+            blank_results.append(ExperimentDay(date=date, ice_file=NCFile(name="", path="", type="ice"),
+                                               tracers_file=NCFile(name="", path="", type="tracers"),
+                                               currents_file=NCFile(name="", path="", type="currents")))
         return blank_results
 
     def skip_some_trash_files(self, files):
-        files_to_skip = ["b_gen.py", "bcondgen6.py", "create_large_net.bat", "grid.nc", "init_gen.py",
-                         "initial_fill_generated_y2013.nc", "year-log.txt"]
-        return list(filter(lambda file: file not in files_to_skip, files))
+        files_to_skip = re.compile(
+            '|'.join(["b_gen.py", "bcondgen6.py", "create_large_net.bat", "grid.nc", "init_gen.py",
+                      "initial_fill_generated_y2013.nc", "year-log.txt"]))
+
+        return list(filter(lambda file: file if files_to_skip.match(file) is None else None, files))
+
+    def path_leaf(self, path):
+        head, tail = os.path.split(path)
+        return tail
 
     def check_for_absence(self):
         '''
@@ -67,3 +81,34 @@ class Experiment:
                 errors.append(error)
 
         return errors
+
+    def check_for_integrity(self):
+        errors = []
+        for day in self._results_by_days:
+            print("Integrity check for: %s" % day)
+            errors_for_day = [day.ice.check_for_integrity(),
+                              day.tracers.check_for_integrity(),
+                              day.currents.check_for_integrity()]
+            total = self._errors_in_total(errors_for_day)
+            errors.append(total)
+            for error in total:
+                logging.error(error)
+
+        return errors
+
+    def check_oceanic_variables(self):
+        errors = []
+        for day in self._results_by_days:
+            print("Variables check for: %s" % day)
+            errors_for_day = [day.ice.check_variables(),
+                              day.tracers.check_variables(),
+                              day.currents.check_variables()]
+            total = self._errors_in_total(errors_for_day)
+            errors.append(total)
+            for error in total:
+                logging.error(error)
+
+        return errors
+
+    def _errors_in_total(self, errors_for_day):
+        return list(filter(lambda error: error if error is not "" else None, errors_for_day))

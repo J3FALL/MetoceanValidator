@@ -4,11 +4,16 @@ files:
     name: "ARCTIC_1h_ice_grid_TUV_(\\d{8})-(\\d{8}).nc"
     prefix: "ARCTIC_1h_ice_grid_TUV_"
     suffix: ".nc"
+    vars: ['iceconc', 'icethic_cea', 'nav_lat', 'nav_lon', 'ncatice', 'siconcat', 'sithicat', 'snowthic_cea', 'uice_ipa', 'vice_ipa']
+
   tracers:
     name: "ARCTIC_1h_T_grid_T_(\\d{8})-(\\d{8}).nc"
     prefix: "ARCTIC_1h_T_grid_T_"
     suffix: ".nc"
+    vars: ['deptht', 'deptht_bounds', 'nav_lat', 'nav_lon', 'sossheig', 'vosaline', 'votemper']
+
   currents:
     name: "ARCTIC_1h_UV_grid_UV_(\\d{8})-(\\d{8}).nc"
     prefix: "ARCTIC_1h_UV_grid_UV_"
     suffix: ".nc"
+    vars: ['depthu', 'depthu_bounds', 'depthv', 'depthv_bounds', 'nav_lat_grid_U', 'nav_lat_grid_V', 'nav_lon_grid_U', 'nav_lon_grid_V', 'vomecrty', 'vozocrtx']

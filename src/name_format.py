@@ -52,3 +52,12 @@ class NameFormat:
     def format(self, date, type):
         return str.join("", [self._formats['files'][type]['prefix'], date.strftime(self._formats['date']),
                              "-", date.strftime(self._formats['date']), self._formats['files'][type]['suffix']])
+
+    def variables(self, type):
+        '''
+
+        :param type: ice, tracers, currents
+        :return: List of oceanic variables that must be presented in simulation result-file of a given type
+        '''
+
+        return self._formats['files'][type]['vars']
