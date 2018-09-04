@@ -1,3 +1,6 @@
+import datetime
+
+import numpy as np
 from netCDF4 import Dataset as NetCDF
 
 from src.file_format import FileFormat
@@ -26,6 +29,7 @@ class NCFile:
         if self.path is "":
             errors.append("%s is absent, can't be opened" % self.name)
         else:
+            # print("%s: opening file: %s" % (datetime.datetime.now().time(), self.name))
             nc_file = NetCDF(self.path)
             nf = FileFormat()
 
@@ -35,6 +39,10 @@ class NCFile:
                     error = self.check_shape(var, correct_var)
                     if error is not "":
                         errors.append(error)
+                    # print("%s: checking for constants: %s" % (datetime.datetime.now().time(), correct_var.name))
+                    if correct_var.name == "iceconc" and self.check_for_constant_values(var):
+                        error = "%s variable is filled constant value only" % self.name
+                        errors.append(error)
                 except KeyError:
                     error = "%s variable is not presented in %s" % (correct_var, self.name)
                     errors.append(error)
@@ -43,3 +51,8 @@ class NCFile:
 
     def check_shape(self, var, correct_var):
         return correct_var.match(var)
+
+    def check_for_constant_values(self, var):
+        # CHECK ONLY TIME[0] FOR SPEED BOOST
+        unique = np.unique(var[0])
+        return len(unique) == 1

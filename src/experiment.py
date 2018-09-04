@@ -103,12 +103,11 @@ class Experiment:
     def check_oceanic_variables(self):
         errors = []
         for day in self._results_by_days:
+            print("Variables check for day: %s" % day)
             if not day.is_none():
-                errors_for_day = [day.ice.check_variables(),
-                                  day.tracers.check_variables(),
-                                  day.currents.check_variables()]
+                errors_for_day = day.ice.check_variables() + day.tracers.check_variables() + day.currents.check_variables()
                 total = self._errors_in_total(errors_for_day)
-                errors.append(total)
+                errors.extend(total)
                 for error in total:
                     logging.error(error)
 
