@@ -1,13 +1,13 @@
 import unittest
 from datetime import date
 
-from src.name_format import NameFormat
+from src.file_format import FileFormat
 
 
-class NameFormatTest(unittest.TestCase):
+class FileFormatTest(unittest.TestCase):
 
     def test_matching_correct(self):
-        nf = NameFormat()
+        nf = FileFormat()
 
         ice_file = "ARCTIC_1h_ice_grid_TUV_20130105-20130105.nc"
         currents_file = "ARCTIC_1h_UV_grid_UV_20140306-20140306.nc"
@@ -18,14 +18,14 @@ class NameFormatTest(unittest.TestCase):
         self.assertEqual(nf.match(tracers_file, "tracers"), ("20010203", ""))
 
     def test_matching_wrong_type(self):
-        nf = NameFormat()
+        nf = FileFormat()
         ice_file = "ARCTIC_1h_ice_grid_TUV_20130105-20130105.nc"
         date, error = nf.match(ice_file, "tracers")
         self.assertEqual(date, "")
         self.assertEqual(error, "%s doesn't correspond to name format of tracers" % ice_file)
 
     def test_matching_incorrect(self):
-        nf = NameFormat()
+        nf = FileFormat()
 
         diff_dates = "ARCTIC_1h_ice_grid_TUV_20130105-20130106.nc"
         incorrect_name = "ARCTIC_1h_ice_XXX_TUV_20130105-20130105.n"
@@ -39,7 +39,7 @@ class NameFormatTest(unittest.TestCase):
         self.assertEqual(error, "%s doesn't correspond to name format of ice" % incorrect_name)
 
     def test_format_correct(self):
-        nf = NameFormat()
+        nf = FileFormat()
 
         source_date = date(2013, 1, 15)
         formatted_date = "ARCTIC_1h_ice_grid_TUV_20130115-20130115.nc"
@@ -47,7 +47,7 @@ class NameFormatTest(unittest.TestCase):
         self.assertEqual(nf.format(source_date, "ice"), formatted_date)
 
     def test_match_type_correct(self):
-        nf = NameFormat()
+        nf = FileFormat()
 
         file = "ARCTIC_1h_ice_grid_TUV_20130115-20130115.nc"
 
@@ -56,7 +56,7 @@ class NameFormatTest(unittest.TestCase):
         self.assertEqual(actual_type, "ice")
 
     def test_match_type_incorrect(self):
-        nf = NameFormat()
+        nf = FileFormat()
 
         file = "ARCTIC_1h_floor_grid_TUV_20130115-20130115.nc"
 
@@ -67,8 +67,8 @@ class NameFormatTest(unittest.TestCase):
         self.assertEqual(actual_type, "")
 
     def test_variables(self):
-        nf = NameFormat()
+        nf = FileFormat()
 
-        expected_vars = ['deptht', 'deptht_bounds', 'nav_lat', 'nav_lon', 'sossheig', 'vosaline', 'votemper']
-
-        self.assertListEqual(nf.variables('tracers'), expected_vars)
+        expected_var_names = ['deptht', 'deptht_bounds', 'nav_lat', 'nav_lon', 'sossheig', 'vosaline', 'votemper']
+        actual_var_names = [var.name for var in nf.variables('tracers')]
+        self.assertListEqual(expected_var_names, actual_var_names)

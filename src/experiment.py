@@ -6,7 +6,7 @@ import re
 
 from src.day import ExperimentDay
 from src.day import date_range
-from src.name_format import NameFormat
+from src.file_format import FileFormat
 from src.netcdf import NCFile
 from src.valid import ValidResults
 
@@ -24,21 +24,25 @@ class Experiment:
         '''
         results_by_days = self.init_blank_results()
         all_files = self.skip_some_trash_files(list(itertools.chain(*files)))
-        nf = NameFormat()
+        nf = FileFormat()
         for path in all_files:
             file_name = self.path_leaf(path)
             type, error = nf.match_type(file_name)
             if error is "":
                 date_str, _ = nf.match(file_name, type)
                 date = datetime.datetime.strptime(date_str, "%Y%m%d").date()
-                day = next(sim_day for sim_day in results_by_days if sim_day.date == date)
-                file = getattr(day, type)
-                file.name = file_name
-                file.path = path
+                if self.date_between(date):
+                    day = next(sim_day for sim_day in results_by_days if sim_day.date == date)
+                    file = getattr(day, type)
+                    file.name = file_name
+                    file.path = path
             else:
                 logging.info(error)
 
         return results_by_days
+
+    def date_between(self, date):
+        return self._date_from <= date <= self._date_to
 
     def init_blank_results(self):
         blank_results = []
@@ -99,14 +103,14 @@ class Experiment:
     def check_oceanic_variables(self):
         errors = []
         for day in self._results_by_days:
-            print("Variables check for: %s" % day)
-            errors_for_day = [day.ice.check_variables(),
-                              day.tracers.check_variables(),
-                              day.currents.check_variables()]
-            total = self._errors_in_total(errors_for_day)
-            errors.append(total)
-            for error in total:
-                logging.error(error)
+            if not day.is_none():
+                errors_for_day = [day.ice.check_variables(),
+                                  day.tracers.check_variables(),
+                                  day.currents.check_variables()]
+                total = self._errors_in_total(errors_for_day)
+                errors.append(total)
+                for error in total:
+                    logging.error(error)
 
         return errors
 

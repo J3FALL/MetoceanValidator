@@ -13,7 +13,7 @@ class BladeChecker:
         self.init_logging()
 
     def init_logging(self):
-        logging.basicConfig(filename='../logs/errors.log', level=logging.INFO)
+        logging.basicConfig(filename='../logs/errors.log', level=logging.INFO, filemode='w')
 
     def check_local_storage(self, mode="absence"):
         logging.info('Started')
