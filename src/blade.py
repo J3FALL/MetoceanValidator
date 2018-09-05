@@ -21,20 +21,18 @@ class BladeChecker:
         print("files amount : %d" % len(files))
         exp = Experiment(date_from=self._date_from, date_to=self._date_to, resulted_files=[files])
 
-        # if mode == "absence":
-        #     errors = exp.check_for_absence()
-        # if mode == "integrity":
-        #     errors = exp.check_for_integrity()
-        # if mode == "vars":
-        #     errors = exp.check_oceanic_variables()
+        if mode == "absence":
+            errors = exp.check_for_absence()
+            return errors
+        else:
 
-        absence_errors = exp.check_for_absence()
-        vars_errors = exp.check_oceanic_variables()
-        self.summary(absence_errors, vars_errors)
+            absence_errors = exp.check_for_absence()
+            vars_errors = exp.check_oceanic_variables()
+            self.summary(absence_errors, vars_errors)
 
-        logging.info('Finished')
+            logging.info('Finished')
 
-        return absence_errors + vars_errors
+            return absence_errors + vars_errors
 
     def get_all_netcdf_files(self):
         files = []
