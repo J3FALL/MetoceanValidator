@@ -4,16 +4,72 @@ files:
     name: "ARCTIC_1h_ice_grid_TUV_(\\d{8})-(\\d{8}).nc"
     prefix: "ARCTIC_1h_ice_grid_TUV_"
     suffix: ".nc"
-    vars: ['iceconc', 'icethic_cea', 'nav_lat', 'nav_lon', 'ncatice', 'siconcat', 'sithicat', 'snowthic_cea', 'uice_ipa', 'vice_ipa']
+    vars:
+      - name: 'iceconc'
+        shape: [24, 400, 1100]
+      - name: 'icethic_cea'
+        shape: [24, 400, 1100]
+      - name: 'nav_lat'
+        shape: [400, 1100]
+      - name: 'nav_lon'
+        shape: [400, 1100]
+      - name: 'ncatice'
+        shape: [8]
+      - name: 'siconcat'
+        shape: [24, 8, 400, 1100]
+      - name: 'sithicat'
+        shape: [24, 8, 400, 1100]
+      - name: 'snowthic_cea'
+        shape: [24, 400, 1100]
+      - name: 'uice_ipa'
+        shape: [24, 400, 1100]
+      - name: 'vice_ipa'
+        shape: [24, 400, 1100]
 
   tracers:
     name: "ARCTIC_1h_T_grid_T_(\\d{8})-(\\d{8}).nc"
     prefix: "ARCTIC_1h_T_grid_T_"
     suffix: ".nc"
-    vars: ['deptht', 'deptht_bounds', 'nav_lat', 'nav_lon', 'sossheig', 'vosaline', 'votemper']
+    vars:
+      - name: 'deptht'
+        shape: [18]
+      - name: 'deptht_bounds'
+        shape: [18, 2]
+      - name: 'nav_lat'
+        shape: [400, 1100]
+      - name: 'nav_lon'
+        shape: [400, 1100]
+      - name: 'sossheig'
+        shape: [24, 400, 1100]
+      - name: 'vosaline'
+        shape: [24, 18, 400, 1100]
+      - name: 'votemper'
+        shape: [24, 18, 400, 1100]
+
+
 
   currents:
     name: "ARCTIC_1h_UV_grid_UV_(\\d{8})-(\\d{8}).nc"
     prefix: "ARCTIC_1h_UV_grid_UV_"
     suffix: ".nc"
-    vars: ['depthu', 'depthu_bounds', 'depthv', 'depthv_bounds', 'nav_lat_grid_U', 'nav_lat_grid_V', 'nav_lon_grid_U', 'nav_lon_grid_V', 'vomecrty', 'vozocrtx']
+    vars:
+      - name: 'depthu'
+        shape: [18]
+      - name: 'depthu_bounds'
+        shape: [18, 2]
+      - name: 'depthv'
+        shape: [18]
+      - name: 'depthv_bounds'
+        shape: [18, 2]
+      - name: 'nav_lat_grid_U'
+        shape: [400, 1100]
+      - name: 'nav_lat_grid_V'
+        shape: [400, 1100]
+      - name: 'nav_lon_grid_U'
+        shape: [400, 1100]
+      - name: 'nav_lon_grid_V'
+        shape: [400, 1100]
+      - name: 'vomecrty'
+        shape: [24, 18, 400, 1100]
+      - name: 'vozocrtx'
+        shape: [24, 18, 400, 1100]

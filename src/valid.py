@@ -1,12 +1,12 @@
 from src.day import ExperimentDay
 from src.day import date_range
-from src.name_format import NameFormat
+from src.file_format import FileFormat
 from src.netcdf import NCFile
 
 
 class ValidResults:
     def __init__(self):
-        self.name_format = NameFormat()
+        self.name_format = FileFormat()
 
     def generate(self, from_date, to_date):
         '''

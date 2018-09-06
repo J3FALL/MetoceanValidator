@@ -13,7 +13,7 @@ class BladeChecker:
         self.init_logging()
 
     def init_logging(self):
-        logging.basicConfig(filename='../logs/errors.log', level=logging.INFO)
+        logging.basicConfig(filename='../logs/errors.log', level=logging.INFO, filemode='w')
 
     def check_local_storage(self, mode="absence"):
         logging.info('Started')
@@ -23,17 +23,37 @@ class BladeChecker:
 
         if mode == "absence":
             errors = exp.check_for_absence()
-        if mode == "integrity":
-            errors = exp.check_for_integrity()
-        if mode == "vars":
-            errors = exp.check_oceanic_variables()
+            return errors
+        else:
 
-        logging.info('Finished')
+            absence_errors = exp.check_for_absence()
+            vars_errors = exp.check_oceanic_variables()
+            self.summary(absence_errors, vars_errors)
 
-        return errors
+            logging.info('Finished')
+
+            return absence_errors + vars_errors
 
     def get_all_netcdf_files(self):
         files = []
         for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
             files.append(file_name)
         return files
+
+    # TODO: extract class or/and Error class
+    def summary(self, absence_errors, vars_errors):
+        print("absence errors total: %d, including:" % len(absence_errors))
+        no_matching = list(filter(lambda error: error if "no matching type" in error else None, absence_errors))
+        not_found_days = list(filter(lambda error: error if "were not found" in error else None, absence_errors))
+        not_found_files = list(filter(lambda error: error if "some missing files" in error else None, absence_errors))
+        print("     no matching type: %d" % len(no_matching))
+        print("      missing days: %d" % len(not_found_days))
+        print("      missing files/incorrect file names: %d" % len(not_found_files))
+
+        print("variable errors total: %d, including:" % len(vars_errors))
+        with_constants = list(filter(lambda error: error if "constant value" in error else None, vars_errors))
+        wrong_shape = list(filter(lambda error: error if "doesn't correspond to" in error else None, vars_errors))
+        missing_vars = list(filter(lambda error: error if "variable is not presented" in error else None, vars_errors))
+        print("     with constant values: %d" % len(with_constants))
+        print("     with wrong shape: %d" % len(wrong_shape))
+        print("     with missing variable: %d" % len(missing_vars))
