@@ -36,7 +36,7 @@ class FileFormat:
                 return type, ""
 
         error = "%s has no matching type" % name
-        logging.info(error)
+
         return "", error
 
     def match(self, name, type):

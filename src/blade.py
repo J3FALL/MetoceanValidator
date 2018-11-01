@@ -11,6 +11,7 @@ class BladeChecker:
         self._date_from = date_from
         self._date_to = date_to
         self.init_logging()
+        self.experiment = ""
 
     def init_logging(self):
         logging.basicConfig(filename='../logs/errors.log', level=logging.INFO, filemode='w')
@@ -19,15 +20,19 @@ class BladeChecker:
         logging.info('Started')
         files = self.get_all_netcdf_files()
         print("files amount : %d" % len(files))
-        exp = Experiment(date_from=self._date_from, date_to=self._date_to, resulted_files=[files])
+        self.experiment = Experiment(date_from=self._date_from, date_to=self._date_to, resulted_files=[files])
 
         if mode == "absence":
-            errors = exp.check_for_absence()
+            errors = self.experiment.check_for_absence()
+            self.summary(errors, [])
+
+            logging.info('Finished')
+
             return errors
         else:
 
-            absence_errors = exp.check_for_absence()
-            vars_errors = exp.check_oceanic_variables()
+            absence_errors = self.experiment.check_for_absence()
+            vars_errors = self.experiment.check_oceanic_variables()
             self.summary(absence_errors, vars_errors)
 
             logging.info('Finished')
@@ -42,6 +47,7 @@ class BladeChecker:
 
     # TODO: extract class or/and Error class
     def summary(self, absence_errors, vars_errors):
+        self.dump_matching_errors()
         print("absence errors total: %d, including:" % len(absence_errors))
         no_matching = list(filter(lambda error: error if "no matching type" in error else None, absence_errors))
         not_found_days = list(filter(lambda error: error if "were not found" in error else None, absence_errors))
@@ -57,3 +63,8 @@ class BladeChecker:
         print("     with constant values: %d" % len(with_constants))
         print("     with wrong shape: %d" % len(wrong_shape))
         print("     with missing variable: %d" % len(missing_vars))
+
+    def dump_matching_errors(self):
+        with open('../logs/matching_errors.log', 'w') as file:
+            for error in self.experiment.matching_log:
+                file.write(error + "\n")

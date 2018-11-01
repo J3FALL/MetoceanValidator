@@ -4,6 +4,8 @@ import logging
 import os
 import re
 
+from tqdm import tqdm
+
 from src.day import ExperimentDay
 from src.day import date_range
 from src.file_format import FileFormat
@@ -15,6 +17,8 @@ class Experiment:
     def __init__(self, date_from, date_to, resulted_files):
         self._date_from = date_from
         self._date_to = date_to
+
+        self.matching_log = []
         self._results_by_days = self.init_results(resulted_files)
         self._results_by_days.sort(key=lambda day: day.date)
 
@@ -28,16 +32,20 @@ class Experiment:
         for path in all_files:
             file_name = self.path_leaf(path)
             type, error = nf.match_type(file_name)
+            # TODO: improve this somehow
             if error is "":
-                date_str, _ = nf.match(file_name, type)
-                date = datetime.datetime.strptime(date_str, "%Y%m%d").date()
-                if self.date_between(date):
-                    day = next(sim_day for sim_day in results_by_days if sim_day.date == date)
-                    file = getattr(day, type)
-                    file.name = file_name
-                    file.path = path
+                date_str, err = nf.match(file_name, type)
+                if err is "":
+                    date = datetime.datetime.strptime(date_str, "%Y%m%d").date()
+                    if self.date_between(date):
+                        day = next(sim_day for sim_day in results_by_days if sim_day.date == date)
+                        file = getattr(day, type)
+                        file.name = file_name
+                        file.path = path
+                else:
+                    self.matching_log.append(err)
             else:
-                logging.info(error)
+                self.matching_log.append(error)
 
         return results_by_days
 
@@ -73,7 +81,7 @@ class Experiment:
         valid_results = ValidResults().generate(self._date_from, self._date_to)
 
         errors = []
-        for valid, given in zip(valid_results, self._results_by_days):
+        for valid, given in tqdm(zip(valid_results, self._results_by_days), total=len(valid_results)):
             if given.is_none():
                 error = "Simulation results were not found for day: %s" % valid.date.strftime("%Y%m%d")
                 logging.info(error)
@@ -88,7 +96,7 @@ class Experiment:
 
     def check_for_integrity(self):
         errors = []
-        for day in self._results_by_days:
+        for day in tqdm(self._results_by_days):
             print("Integrity check for: %s" % day)
             errors_for_day = [day.ice.check_for_integrity(),
                               day.tracers.check_for_integrity(),
@@ -102,10 +110,11 @@ class Experiment:
 
     def check_oceanic_variables(self):
         errors = []
-        for day in self._results_by_days:
+        for day in tqdm(self._results_by_days):
             print("Variables check for day: %s" % day)
             if not day.is_none():
-                errors_for_day = day.ice.check_variables() + day.tracers.check_variables() + day.currents.check_variables()
+                errors_for_day = \
+                    day.ice.check_variables() + day.tracers.check_variables() + day.currents.check_variables()
                 total = self._errors_in_total(errors_for_day)
                 errors.extend(total)
                 for error in total:

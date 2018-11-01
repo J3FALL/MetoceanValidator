@@ -1,5 +1,3 @@
-import datetime
-
 import numpy as np
 from netCDF4 import Dataset as NetCDF
 
@@ -54,5 +52,5 @@ class NCFile:
 
     def check_for_constant_values(self, var):
         # CHECK ONLY TIME[0] FOR SPEED BOOST
-        unique = np.unique(var[0])
+        unique = np.unique(var)
         return len(unique) == 1
