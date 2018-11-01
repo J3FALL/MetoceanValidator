@@ -16,7 +16,7 @@ class BladeChecker:
     def init_logging(self):
         logging.basicConfig(filename='../logs/errors.log', level=logging.INFO, filemode='w')
 
-    def check_local_storage(self, mode="absence"):
+    def check_local_storage(self, mode="absence", summary=False):
         logging.info('Started')
         files = self.get_all_netcdf_files()
         print("files amount : %d" % len(files))
@@ -24,7 +24,8 @@ class BladeChecker:
 
         if mode == "absence":
             errors = self.experiment.check_for_absence()
-            self.summary(errors, [])
+            if summary:
+                self.summary(errors, [])
 
             logging.info('Finished')
 
@@ -33,7 +34,9 @@ class BladeChecker:
 
             absence_errors = self.experiment.check_for_absence()
             vars_errors = self.experiment.check_oceanic_variables()
-            self.summary(absence_errors, vars_errors)
+
+            if summary:
+                self.summary(absence_errors, vars_errors)
 
             logging.info('Finished')
 
