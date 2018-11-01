@@ -27,10 +27,10 @@ class NCFile:
         if self.path is "":
             errors.append("%s is absent, can't be opened" % self.name)
         else:
-            # print("%s: opening file: %s" % (datetime.datetime.now().time(), self.name))
             nc_file = NetCDF(self.path)
             nf = FileFormat()
 
+            # print("Variables checking in %s " % self.name)
             for correct_var in nf.variables(self.type):
                 try:
                     var = nc_file.variables[correct_var.name]
@@ -38,9 +38,9 @@ class NCFile:
                     if error is not "":
                         errors.append(error)
                     # print("%s: checking for constants: %s" % (datetime.datetime.now().time(), correct_var.name))
-                    if correct_var.name == "iceconc" and self.check_for_constant_values(var):
-                        error = "%s variable is filled constant value only" % self.name
-                        errors.append(error)
+                    # if self.check_for_constant_values(var):
+                    #     error = "%s variable is filled constant value only in %s" % (var.name, self.name)
+                    #     errors.append(error)
                 except KeyError:
                     error = "%s variable is not presented in %s" % (correct_var, self.name)
                     errors.append(error)
