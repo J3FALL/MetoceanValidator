@@ -3,6 +3,7 @@ import itertools
 import logging
 import os
 import re
+from multiprocessing import Pool
 
 from tqdm import tqdm
 
@@ -110,17 +111,27 @@ class Experiment:
 
     def check_oceanic_variables(self):
         errors = []
-        for day in tqdm(self._results_by_days):
-            print("Variables check for day: %s" % day)
-            if not day.is_none():
-                errors_for_day = \
-                    day.ice.check_variables() + day.tracers.check_variables() + day.currents.check_variables()
-                total = self._errors_in_total(errors_for_day)
-                errors.extend(total)
-                for error in total:
-                    logging.error(error)
+        cpu_count = 16
+        with Pool(processes=cpu_count) as p:
+            days_amount = len(self._results_by_days)
+
+            with tqdm(total=days_amount) as progress_bar:
+                for idx, err in tqdm(enumerate(p.imap_unordered(self.check_day, self._results_by_days))):
+                    errors.extend(err)
+                    progress_bar.update()
 
         return errors
+
+    def check_day(self, day):
+        total = []
+        if not day.is_none():
+            errors_for_day = \
+                day.ice.check_variables() + day.tracers.check_variables() + day.currents.check_variables()
+            total = self._errors_in_total(errors_for_day)
+            for error in total:
+                logging.error(error)
+
+        return total
 
     def _errors_in_total(self, errors_for_day):
         return list(filter(lambda error: error if error is not "" else None, errors_for_day))
