@@ -70,6 +70,22 @@ class FtpStorage:
 
         return files
 
+    def file_names_by_year(self, year):
+        '''
+        Returns names of all files that are stored in ftp-storage for a given year
+        '''
+
+        dir = next(d for d in self.dirs if d.year == year)
+        connect = ftplib.FTP(host=dir.ip, user=self.credentials['user'], passwd=self.credentials['pass'])
+        files = []
+        try:
+            connect.cwd(dir.path)
+            files = connect.nlst()
+        except Exception:
+            print("error has occurred")
+
+        return files
+
     def download_year(self, year, path_to_download=''):
 
         dir = next(d for d in self.dirs if d.year == year)
@@ -86,6 +102,10 @@ class FtpStorage:
             host_file = os.path.join(path_to_download, file)
             with open(host_file, 'wb') as local_file:
                 connect.retrbinary('RETR ' + file, local_file.write)
+
+    def mount_dir_by_year(self, year):
+        dir = next(d for d in self.dirs if d.year == year)
+        return self.storage_to_dirs[dir.ip]
 
 
 class Directory:
