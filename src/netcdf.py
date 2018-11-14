@@ -2,8 +2,6 @@ import numpy as np
 from netCDF4 import Dataset as NetCDF
 from numpy.ma import MaskedArray
 
-from src.file_format import FileFormat
-
 
 class NCFile:
     def __init__(self, name, path, type):
@@ -21,16 +19,15 @@ class NCFile:
 
         return error
 
-    def check_variables(self):
+    def check_variables(self, file_format):
         errors = []
 
         if self.path is "":
             errors.append("%s is absent, can't be opened" % self.name)
         else:
             nc_file = NetCDF(self.path)
-            nf = FileFormat()
 
-            for correct_var in nf.variables(self.type):
+            for correct_var in file_format.variables(self.type):
                 try:
                     var = nc_file.variables[correct_var.name]
                     error = self.check_shape(var, correct_var, self.name)

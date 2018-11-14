@@ -11,11 +11,12 @@ nemo14_dir = '/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/coarse_grid/'
 
 
 class BladeChecker:
-    def __init__(self, date_from, date_to):
+    def __init__(self, date_from, date_to, file_format):
         # self._storage_path = os.environ['STORAGE_PATH']
         self._storage_path = nemo14_dir
         self._date_from = date_from
         self._date_to = date_to
+        self.file_format = file_format
         self.init_logging()
         self.experiment = ""
 
@@ -26,7 +27,8 @@ class BladeChecker:
         logging.info('Started')
         files = self.get_all_netcdf_files()
         print("files amount : %d" % len(files))
-        self.experiment = Experiment(date_from=self._date_from, date_to=self._date_to, resulted_files=[files])
+        self.experiment = Experiment(date_from=self._date_from, date_to=self._date_to,
+                                     resulted_files=[files], file_format=self.file_format)
 
         if mode == "absence":
             errors = self.experiment.check_for_absence()

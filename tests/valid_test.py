@@ -2,6 +2,7 @@ import unittest
 from datetime import date
 
 from src.day import ExperimentDay
+from src.file_format import FileFormat
 from src.netcdf import NCFile
 from src.valid import ValidResults
 
@@ -9,7 +10,7 @@ from src.valid import ValidResults
 class ValidResultsTest(unittest.TestCase):
 
     def test_valid_results(self):
-        results = ValidResults()
+        results = ValidResults(file_format=FileFormat("../formats.yaml"))
 
         date_from = date(2013, 1, 1)
         date_to = date(2013, 1, 3)

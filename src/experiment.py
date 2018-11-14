@@ -9,15 +9,15 @@ from tqdm import tqdm
 
 from src.day import ExperimentDay
 from src.day import date_range
-from src.file_format import FileFormat
 from src.netcdf import NCFile
 from src.valid import ValidResults
 
 
 class Experiment:
-    def __init__(self, date_from, date_to, resulted_files):
+    def __init__(self, date_from, date_to, resulted_files, file_format):
         self._date_from = date_from
         self._date_to = date_to
+        self.file_format = file_format
 
         self.matching_log = []
         self._results_by_days = self.init_results(resulted_files)
@@ -29,13 +29,13 @@ class Experiment:
         '''
         results_by_days = self.init_blank_results()
         all_files = self.skip_some_trash_files(list(itertools.chain(*files)))
-        nf = FileFormat()
+
         for path in all_files:
             file_name = self.path_leaf(path)
-            type, error = nf.match_type(file_name)
+            type, error = self.file_format.match_type(file_name)
             # TODO: improve this somehow
             if error is "":
-                date_str, err = nf.match(file_name, type)
+                date_str, err = self.file_format.match(file_name, type)
                 if err is "":
                     date = datetime.datetime.strptime(date_str, "%Y%m%d").date()
                     if self.date_between(date):
@@ -79,7 +79,7 @@ class Experiment:
         :return: List of errors
         '''
 
-        valid_results = ValidResults().generate(self._date_from, self._date_to)
+        valid_results = ValidResults(self.file_format).generate(self._date_from, self._date_to)
 
         errors = []
         for valid, given in tqdm(zip(valid_results, self._results_by_days), total=len(valid_results)):
@@ -131,7 +131,7 @@ class Experiment:
                 integrity_error = var.check_for_integrity()
 
                 if integrity_error is "":
-                    var_errors = var.check_variables()
+                    var_errors = var.check_variables(self.file_format)
                     errors_for_day = errors_for_day + var_errors
                 else:
                     errors_for_day.append(integrity_error)

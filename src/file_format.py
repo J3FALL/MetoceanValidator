@@ -84,7 +84,7 @@ class Variable:
         var_shape = list(var.shape)
         if len(self.shape) != len(var_shape) or self.shape != var_shape:
             log_prefix = " ".join(args)
-            return f"{log_prefix}Variable: {self.name} doesn't correspond to pattern, expected: " \
+            return f"{log_prefix} Variable: {self.name} doesn't correspond to pattern, expected: " \
                    f"{self.shape}, actual: {str(var_shape)}"
 
         return ""
