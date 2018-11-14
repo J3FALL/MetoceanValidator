@@ -125,8 +125,19 @@ class Experiment:
     def check_day(self, day):
         total = []
         if not day.is_none():
-            errors_for_day = \
-                day.ice.check_variables() + day.tracers.check_variables() + day.currents.check_variables()
+            errors_for_day = []
+
+            for var in [day.ice, day.tracers, day.currents]:
+                integrity_error = var.check_for_integrity()
+
+                if integrity_error is "":
+                    var_errors = var.check_variables()
+                    errors_for_day = errors_for_day + var_errors
+                else:
+                    errors_for_day.append(integrity_error)
+
+            # errors_for_day = \
+            #     day.ice.check_variables() + day.tracers.check_variables() + day.currents.check_variables()
             total = self._errors_in_total(errors_for_day)
             for error in total:
                 logging.error(error)

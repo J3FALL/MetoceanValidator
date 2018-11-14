@@ -6,12 +6,13 @@ import yaml
 
 
 class FileFormat:
-    def __init__(self):
+    def __init__(self, format_file="../nemo14-formats.yaml"):
+        self.format_file = format_file
         self._formats = self.load_formats()
         self._vars_formats = self.init_vars_formats()
 
     def load_formats(self):
-        with open(os.path.join(os.path.dirname(__file__), "../formats.yaml"), 'r') as stream:
+        with open(os.path.join(os.path.dirname(__file__), self.format_file), 'r') as stream:
             try:
                 loaded = yaml.load(stream)
                 return loaded
@@ -79,10 +80,11 @@ class Variable:
         self.name = name
         self.shape = shape
 
-    def match(self, var):
+    def match(self, var, *args):
         var_shape = list(var.shape)
         if len(self.shape) != len(var_shape) or self.shape != var_shape:
-            return "Variable: %s doesn't correspond to pattern, expected: %s, actual: %s" % \
-                   (self.name, str(self.shape), str(var_shape))
+            log_prefix = " ".join(args)
+            return f"{log_prefix}Variable: {self.name} doesn't correspond to pattern, expected: " \
+                   f"{self.shape}, actual: {str(var_shape)}"
 
         return ""

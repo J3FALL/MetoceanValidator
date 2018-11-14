@@ -7,10 +7,13 @@ from src.ftp import missed_years
 
 TEMP_DIR = "../temp_missed"
 
+nemo14_dir = '/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/coarse_grid/'
+
 
 class BladeChecker:
     def __init__(self, date_from, date_to):
-        self._storage_path = os.environ['STORAGE_PATH']
+        # self._storage_path = os.environ['STORAGE_PATH']
+        self._storage_path = nemo14_dir
         self._date_from = date_from
         self._date_to = date_to
         self.init_logging()
@@ -47,8 +50,16 @@ class BladeChecker:
 
     def get_all_netcdf_files(self):
         files = []
-        for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
-            files.append(file_name)
+
+        dirs = [str(year) for year in range(2004, 2009)]
+
+        for dir in dirs:
+            for file_name in glob.iglob(
+                    self._storage_path + f"{dir}/*.nc", recursive=True):
+                files.append(file_name)
+
+        # for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
+        #     files.append(file_name)
         return files
 
     def check_storage_with_ftp(self, storage, mode='absence', summary=False):
@@ -113,10 +124,12 @@ class BladeChecker:
             wrong_shape = list(filter(lambda error: error if "doesn't correspond to" in error else None, vars_errors))
             missing_vars = list(
                 filter(lambda error: error if "variable is not presented" in error else None, vars_errors))
+            nan_values = list(filter(lambda error: error if "has NaN-value" in error else None, vars_errors))
 
             file.write('\twith constant values: %d\n' % len(with_constants))
             file.write('\twith wrong shape: %d\n' % len(wrong_shape))
             file.write('\twith missing variable: %d\n' % len(missing_vars))
+            file.write('\twith NaNs: %d\n' % len(nan_values))
 
     def dump_matching_errors(self):
         with open('../logs/matching_errors.log', 'w') as file:
