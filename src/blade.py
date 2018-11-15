@@ -122,8 +122,18 @@ class BladeChecker:
                 self.summary(errors, [])
 
             logging.info('Finished')
-
             return errors
+
+        else:
+            absence_errors = self.experiment.check_for_absence()
+            vars_errors = self.experiment.check_variables()
+
+            if summary:
+                self.summary(absence_errors, vars_errors)
+
+            logging.info('Finished')
+
+            return absence_errors + vars_errors
 
     def wrf_yearly_files(self):
         files = []

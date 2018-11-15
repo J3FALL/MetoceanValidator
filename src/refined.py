@@ -13,4 +13,4 @@ from src.file_format import FileFormat
 
 checker = BladeChecker(date_from=date(1964, 1, 1), date_to=date(2015, 12, 31),
                        file_format=FileFormat(format_file='../formats/wrf-formats.yaml'))
-checker.check_wrf_files(mode='absence', summary=True)
+checker.check_wrf_files(mode='', summary=True)

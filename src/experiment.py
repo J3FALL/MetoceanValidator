@@ -176,19 +176,19 @@ class WRFExperiment:
                 if not self.year_between(matched_year):
                     print(f"{file_name} is outside the ({self._year_from}, {self._year_to}) experiment period")
                 else:
-                    self._fill_year(results_by_years, file_name, matched_year)
+                    self._fill_year(results_by_years, file, file_name, matched_year)
 
         return results_by_years
 
     def _blank_results(self):
         return [(MISSING_FILE, year) for year in range(self._year_from, self._year_to + 1)]
 
-    def _fill_year(self, results, file_name, matched_year):
+    def _fill_year(self, results, path, file_name, matched_year):
         for idx in range(len(results)):
             _, year = results[idx]
 
             if matched_year == year:
-                results[idx] = (file_name, matched_year)
+                results[idx] = (NCFile(name=file_name, path=path, type='wrf'), matched_year)
 
     def path_leaf(self, path):
         head, tail = os.path.split(path)
@@ -208,3 +208,31 @@ class WRFExperiment:
                 errors.append(error)
 
         return errors
+
+    def check_variables(self):
+        errors = []
+        for yearly_file, year in tqdm(self.results_by_years):
+
+            if yearly_file is not MISSING_FILE:
+                error = self.check_year(yearly_file)
+                errors.extend(error)
+
+        return errors
+
+    def check_year(self, file):
+        errors_for_year = []
+        integrity_error = file.check_for_integrity()
+        if integrity_error is "":
+            var_errors = file.check_variables(self.file_format)
+            errors_for_year.extend(var_errors)
+        else:
+            errors_for_year.append(integrity_error)
+
+        total = self._errors_in_total(errors_for_year)
+        for error in total:
+            logging.error(error)
+
+        return total
+
+    def _errors_in_total(self, errors_for_day):
+        return list(filter(lambda error: error if error is not "" else None, errors_for_day))

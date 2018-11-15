@@ -45,7 +45,10 @@ class NCFile:
         return errors
 
     def check_shape(self, var, correct_var, file_name):
-        return correct_var.match(var, file_name)
+        if self.type is not 'wrf':
+            return correct_var.match(var, file_name)
+        else:
+            return correct_var.match(var, file_name, wrf=True)
 
     def check_for_constant_values(self, var):
         # CHECK ONLY TIME[0] FOR SPEED BOOST

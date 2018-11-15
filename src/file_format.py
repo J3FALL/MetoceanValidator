@@ -84,9 +84,24 @@ class Variable:
         self.name = name
         self.shape = shape
 
-    def match(self, var, *args):
+    def match(self, var, *args, **kwargs):
         var_shape = list(var.shape)
-        if len(self.shape) != len(var_shape) or self.shape != var_shape:
+
+        is_error = False
+
+        # Dirty hack with wrf leap years
+        if 'wrf' in kwargs:
+
+            if len(self.shape) != len(var_shape) or self.shape[1:] != var_shape[1:]:
+                is_error = True
+            else:
+                if len(self.shape) > 2 and self.shape[0] not in [8784, 8760]:
+                    is_error = True
+        else:
+            if len(self.shape) != len(var_shape) or self.shape != var_shape:
+                is_error = True
+
+        if is_error:
             log_prefix = " ".join(args)
             return f"{log_prefix} Variable: {self.name} doesn't correspond to pattern, expected: " \
                    f"{self.shape}, actual: {str(var_shape)}"
