@@ -2,7 +2,10 @@ import glob
 import logging
 import os
 
-from src.experiment import Experiment
+from src.experiment import (
+    Experiment,
+    WRFExperiment
+)
 from src.ftp import missed_years
 
 TEMP_DIR = "../temp_missed"
@@ -14,7 +17,7 @@ wrf_dir = '/home/hpc-rosneft/nfs/0_41/share_2/output_data/Output/Arctic/WRF/'
 class BladeChecker:
     def __init__(self, date_from, date_to, file_format):
         # self._storage_path = os.environ['STORAGE_PATH']
-        self._storage_path = nemo14_dir
+        self._storage_path = wrf_dir
         self._date_from = date_from
         self._date_to = date_to
         self.file_format = file_format
@@ -111,6 +114,16 @@ class BladeChecker:
 
         files = self.wrf_yearly_files()
 
+        self.experiment = WRFExperiment(year_from=self._date_from.year, year_to=self._date_to.year,
+                                        resulted_files=files, file_format=self.file_format)
+        if mode == 'absence':
+            errors = self.experiment.check_for_absence()
+            if summary:
+                self.summary(errors, [])
+
+            logging.info('Finished')
+
+            return errors
 
     def wrf_yearly_files(self):
         files = []
