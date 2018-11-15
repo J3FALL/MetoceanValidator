@@ -1,0 +1,19 @@
+date: "%Y%m%d"
+files:
+  wrf:
+    name: 'wrf.(\\d{4}).nc'
+    prefix: 'wrf.'
+    suffix: '.nc'
+    vars:
+      - name: 'PSFC'
+        shape: [8785, 479, 439]
+      - name: 'T2'
+        shape: [8785, 479, 439]
+      - name: 'u_10m'
+        shape: [8785, 479, 439]
+      - name: 'v_10m'
+        shape: [8785, 479, 439]
+      - name: 'XLAT'
+        shape: [479, 439]
+      - name: 'XLONG'
+        shape: [479, 439]

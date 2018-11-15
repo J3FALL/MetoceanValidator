@@ -6,7 +6,7 @@ import yaml
 
 
 class FileFormat:
-    def __init__(self, format_file="../nemo14-formats.yaml"):
+    def __init__(self, format_file="../formats/nemo14-formats.yaml"):
         self.format_file = format_file
         self._formats = self.load_formats()
         self._vars_formats = self.init_vars_formats()
@@ -22,7 +22,8 @@ class FileFormat:
 
     def init_vars_formats(self):
         vars_by_type = {}
-        types = ['ice', 'tracers', 'currents']
+        types = [type for type in self._formats['files']]
+
         for type in types:
             vars_by_type[type] = []
             for var in self._formats['files'][type]['vars']:
