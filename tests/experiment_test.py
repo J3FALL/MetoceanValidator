@@ -2,6 +2,7 @@ import unittest
 from datetime import date
 
 from src.experiment import Experiment
+from src.experiment import WRFExperiment
 from src.file_format import FileFormat
 
 
@@ -47,3 +48,24 @@ class ExperimentTest(unittest.TestCase):
         error = "Simulation results for day: 20130101 have some missing files or its names are incorrect"
         self.assertEqual(len(errors), 1)
         self.assertIn(error, errors[0])
+
+
+class WRFExperimentTest(unittest.TestCase):
+    def test_check_for_absence_correct(self):
+        exp = WRFExperiment(year_from=2000, year_to=2000,
+                            resulted_files=['../wrf.2000.nc'], file_format=FileFormat('../formats/wrf-formats.yaml'))
+        errors = exp.check_for_absence()
+
+        self.assertEqual(len(errors), 0)
+
+    def test_check_for_absence_missing_files(self):
+        exp = WRFExperiment(year_from=2000, year_to=2005,
+                            resulted_files=['../wrf.2000.nc'], file_format=FileFormat('../formats/wrf-formats.yaml'))
+
+        errors = exp.check_for_absence()
+
+        expected_missed_years = 5
+        expected_error = 'Simulation results were not found for year: 2001'
+
+        self.assertEqual(len(errors), expected_missed_years)
+        self.assertIn(expected_error, errors)

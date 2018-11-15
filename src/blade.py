@@ -8,6 +8,7 @@ from src.ftp import missed_years
 TEMP_DIR = "../temp_missed"
 
 nemo14_dir = '/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/coarse_grid/'
+wrf_dir = '/home/hpc-rosneft/nfs/0_41/share_2/output_data/Output/Arctic/WRF/'
 
 
 class BladeChecker:
@@ -52,7 +53,7 @@ class BladeChecker:
 
     def get_all_netcdf_files(self):
         files = []
-
+        # TODO: temporary solution, refactor this later
         dirs = [str(year) for year in range(2004, 2009)]
 
         for dir in dirs:
@@ -69,7 +70,8 @@ class BladeChecker:
         files = self.combined_file_names(storage)
         print("files amount : %d" % len(files))
 
-        self.experiment = Experiment(date_from=self._date_from, date_to=self._date_to, resulted_files=[files])
+        self.experiment = Experiment(date_from=self._date_from, date_to=self._date_to,
+                                     resulted_files=[files], file_format=self.file_format)
 
         if mode == 'absence':
             errors = self.experiment.check_for_absence()
@@ -101,6 +103,19 @@ class BladeChecker:
                                glob.iglob(os.path.join(ftp_storage.mount_dir_by_year(dir.year), dir.path) + "**/*.nc",
                                           recursive=True)]
                 files.extend(files_local)
+
+        return files
+
+    def check_wrf_files(self, mode='absence', summary=False):
+        logging.info('Started')
+
+        files = self.wrf_yearly_files()
+
+
+    def wrf_yearly_files(self):
+        files = []
+        for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
+            files.append(file_name)
 
         return files
 

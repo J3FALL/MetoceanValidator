@@ -54,7 +54,10 @@ class FileFormat:
         error = ""
         try:
             matches = re.search(pattern, name).groups()
-            assert matches[0] == matches[1]
+            # TODO: assertion error for wrf-files
+            # assert matches[0] == matches[1]
+            if len(matches) > 1 and matches[1] != '' and matches[0] != matches[1]:
+                raise Exception
             date = matches[0]
 
         except Exception:

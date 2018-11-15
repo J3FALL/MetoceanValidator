@@ -12,6 +12,8 @@ from src.day import date_range
 from src.netcdf import NCFile
 from src.valid import ValidResults
 
+MISSING_FILE = 'missing_file'
+
 
 class Experiment:
     def __init__(self, date_from, date_to, resulted_files, file_format):
@@ -146,3 +148,63 @@ class Experiment:
 
     def _errors_in_total(self, errors_for_day):
         return list(filter(lambda error: error if error is not "" else None, errors_for_day))
+
+
+class WRFExperiment:
+    def __init__(self, year_from, year_to, resulted_files, file_format):
+        self._year_from = year_from
+        self._year_to = year_to
+        self.file_format = file_format
+
+        self.results = sorted(resulted_files)
+
+        self.matching_log = []
+        self.results_by_years = self._match_results()
+
+    def _match_results(self):
+
+        results_by_years = self._blank_results()
+
+        for file in self.results:
+            file_name = self.path_leaf(file)
+            type, error = self.file_format.match_type(file_name)
+            if error is not '':
+                self.matching_log.append(error)
+            else:
+                matched_year, _ = self.file_format.match(file_name, type)
+                matched_year = int(matched_year)
+                if not self.year_between(matched_year):
+                    print(f"{file_name} is outside the ({self._year_from}, {self._year_to}) experiment period")
+                else:
+                    self._fill_year(results_by_years, file_name, matched_year)
+
+        return results_by_years
+
+    def _blank_results(self):
+        return [(MISSING_FILE, year) for year in range(self._year_from, self._year_to + 1)]
+
+    def _fill_year(self, results, file_name, matched_year):
+        for idx in range(len(results)):
+            _, year = results[idx]
+
+            if matched_year == year:
+                results[idx] = (file_name, matched_year)
+
+    def path_leaf(self, path):
+        head, tail = os.path.split(path)
+        return tail
+
+    def year_between(self, year):
+        return self._year_from <= year <= self._year_to
+
+    def check_for_absence(self):
+        errors = []
+
+        for results in self.results_by_years:
+            file, year = results
+            if file is MISSING_FILE:
+                error = f"Simulation results were not found for year: {year}"
+                logging.info(error)
+                errors.append(error)
+
+        return errors
