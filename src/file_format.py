@@ -56,9 +56,16 @@ class FileFormat:
             matches = re.search(pattern, name).groups()
             # TODO: assertion error for wrf-files
             # assert matches[0] == matches[1]
-            if len(matches) > 1 and matches[1] != '' and matches[0] != matches[1]:
-                raise Exception
-            date = matches[0]
+            if type == 'waves':
+                if len(matches) != 2:
+                    raise Exception
+                year, month = matches
+                return (int(year), int(month)), ''
+            else:
+
+                if len(matches) > 1 and matches[1] != '' and matches[0] != matches[1]:
+                    raise Exception
+                date = matches[0]
 
         except Exception:
             error = "%s doesn't correspond to name format of %s" % (name, type)

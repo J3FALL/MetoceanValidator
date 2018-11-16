@@ -136,19 +136,16 @@ class BladeChecker:
 
             return absence_errors + vars_errors
 
-    def check_wave_watch_files(self):
-
-        files = self.wrf_yearly_files()
-
-        for file in files:
-            print(file)
-
     def wrf_yearly_files(self):
         files = []
         for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
             files.append(file_name)
 
         return files
+
+    def check_wave_watch_files(self):
+
+        files = self.wrf_yearly_files()
 
     def wave_watch_monthly_files(self):
         files = []
