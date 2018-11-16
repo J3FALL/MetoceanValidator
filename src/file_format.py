@@ -78,6 +78,9 @@ class FileFormat:
 
         return self._vars_formats[type]
 
+    def leap_years(self):
+        return self._formats['leap_years']
+
 
 class Variable:
     def __init__(self, name, shape):
@@ -95,8 +98,20 @@ class Variable:
             if len(self.shape) != len(var_shape) or self.shape[1:] != var_shape[1:]:
                 is_error = True
             else:
-                if len(self.shape) > 2 and self.shape[0] not in [8784, 8760]:
-                    is_error = True
+                if len(self.shape) > 2:
+                    year = kwargs['year']
+                    file_format = kwargs['file_format']
+                    time_idx = 0
+                    if (self._is_leap(year, file_format) and self.shape[time_idx] < 8784) or \
+                            (not self._is_leap(year, file_format) and self.shape[time_idx] < 8760):
+                        log_prefix = " ".join(args)
+
+                        shape_to_print = self.shape
+                        shape_to_print[time_idx] = 8784 if self._is_leap(year, file_format) else 8760
+                        print(year, shape_to_print, var_shape)
+                        return f"{log_prefix} Variable: {self.name} doesn't correspond to pattern, expected: " \
+                               f"{shape_to_print}, actual: {str(var_shape)}"
+
         else:
             if len(self.shape) != len(var_shape) or self.shape != var_shape:
                 is_error = True
@@ -107,3 +122,6 @@ class Variable:
                    f"{self.shape}, actual: {str(var_shape)}"
 
         return ""
+
+    def _is_leap(self, year, file_format):
+        return True if year in file_format.leap_years() else False

@@ -30,7 +30,7 @@ class NCFile:
             for correct_var in file_format.variables(self.type):
                 try:
                     var = nc_file.variables[correct_var.name]
-                    error = self.check_shape(var, correct_var, self.name)
+                    error = self.check_shape(var, correct_var, self.name, file_format)
                     if error is not "":
                         errors.append(error)
 
@@ -44,11 +44,17 @@ class NCFile:
 
         return errors
 
-    def check_shape(self, var, correct_var, file_name):
+    def check_shape(self, var, correct_var, file_name, file_format):
         if self.type is not 'wrf':
             return correct_var.match(var, file_name)
         else:
-            return correct_var.match(var, file_name, wrf=True)
+            return correct_var.match(var, file_name, wrf=True, year=self._parse_year(), file_format=file_format)
+
+    def _parse_year(self):
+        '''
+        For wrf-files only
+        '''
+        return int(self.name.split(".")[1])
 
     def check_for_constant_values(self, var):
         # CHECK ONLY TIME[0] FOR SPEED BOOST
