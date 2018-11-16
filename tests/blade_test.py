@@ -3,6 +3,7 @@ from datetime import date
 from unittest.mock import patch
 
 from src.blade import BladeChecker
+from src.file_format import FileFormat
 
 
 class BladeTest(unittest.TestCase):
@@ -17,7 +18,8 @@ class BladeTest(unittest.TestCase):
                        'ARCTIC_1h_UV_grid_UV_20130101-20130101.nc']
 
     def setUp(self):
-        self.checker = BladeChecker(date_from=date(2013, 1, 1), date_to=date(2013, 1, 3))
+        self.checker = BladeChecker(date_from=date(2013, 1, 1), date_to=date(2013, 1, 3),
+                                    file_format=FileFormat('../formats/formats.yaml'))
 
     @patch('src.blade.BladeChecker.get_all_netcdf_files', return_value=mocked_nc_files)
     def test_check_local_storage_for_absence_correct(self, _):

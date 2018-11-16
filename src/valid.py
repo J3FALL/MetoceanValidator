@@ -5,8 +5,8 @@ from src.netcdf import NCFile
 
 
 class ValidResults:
-    def __init__(self):
-        self.name_format = FileFormat()
+    def __init__(self, file_format):
+        self.file_format = file_format
 
     def generate(self, from_date, to_date):
         '''
@@ -18,10 +18,10 @@ class ValidResults:
         results = []
         for date in date_range(from_date, to_date):
             results.append(ExperimentDay(date=date,
-                                         ice_file=NCFile(name=self.name_format.format(date, 'ice'), path='',
+                                         ice_file=NCFile(name=self.file_format.format(date, 'ice'), path='',
                                                          type='ice'),
-                                         tracers_file=NCFile(name=self.name_format.format(date, 'tracers'), path='',
+                                         tracers_file=NCFile(name=self.file_format.format(date, 'tracers'), path='',
                                                              type='tracers'),
-                                         currents_file=NCFile(name=self.name_format.format(date, 'currents'), path='',
+                                         currents_file=NCFile(name=self.file_format.format(date, 'currents'), path='',
                                                               type='currents')))
         return results

@@ -6,12 +6,13 @@ import yaml
 
 
 class FileFormat:
-    def __init__(self):
+    def __init__(self, format_file="../formats/nemo14-formats.yaml"):
+        self.format_file = format_file
         self._formats = self.load_formats()
         self._vars_formats = self.init_vars_formats()
 
     def load_formats(self):
-        with open(os.path.join(os.path.dirname(__file__), "../formats.yaml"), 'r') as stream:
+        with open(os.path.join(os.path.dirname(__file__), self.format_file), 'r') as stream:
             try:
                 loaded = yaml.load(stream)
                 return loaded
@@ -21,7 +22,8 @@ class FileFormat:
 
     def init_vars_formats(self):
         vars_by_type = {}
-        types = ['ice', 'tracers', 'currents']
+        types = [type for type in self._formats['files']]
+
         for type in types:
             vars_by_type[type] = []
             for var in self._formats['files'][type]['vars']:
@@ -52,7 +54,10 @@ class FileFormat:
         error = ""
         try:
             matches = re.search(pattern, name).groups()
-            assert matches[0] == matches[1]
+            # TODO: assertion error for wrf-files
+            # assert matches[0] == matches[1]
+            if len(matches) > 1 and matches[1] != '' and matches[0] != matches[1]:
+                raise Exception
             date = matches[0]
 
         except Exception:
@@ -73,16 +78,50 @@ class FileFormat:
 
         return self._vars_formats[type]
 
+    def leap_years(self):
+        return self._formats['leap_years']
+
 
 class Variable:
     def __init__(self, name, shape):
         self.name = name
         self.shape = shape
 
-    def match(self, var):
+    def match(self, var, *args, **kwargs):
         var_shape = list(var.shape)
-        if len(self.shape) != len(var_shape) or self.shape != var_shape:
-            return "Variable: %s doesn't correspond to pattern, expected: %s, actual: %s" % \
-                   (self.name, str(self.shape), str(var_shape))
+
+        is_error = False
+
+        # Dirty hack with wrf leap years
+        if 'wrf' in kwargs:
+
+            if len(self.shape) != len(var_shape) or self.shape[1:] != var_shape[1:]:
+                is_error = True
+            else:
+                if len(self.shape) > 2:
+                    year = kwargs['year']
+                    file_format = kwargs['file_format']
+                    time_idx = 0
+                    if (self._is_leap(year, file_format) and self.shape[time_idx] < 8784) or \
+                            (not self._is_leap(year, file_format) and self.shape[time_idx] < 8760):
+                        log_prefix = " ".join(args)
+
+                        shape_to_print = self.shape
+                        shape_to_print[time_idx] = 8784 if self._is_leap(year, file_format) else 8760
+                        print(year, shape_to_print, var_shape)
+                        return f"{log_prefix} Variable: {self.name} doesn't correspond to pattern, expected: " \
+                               f"{shape_to_print}, actual: {str(var_shape)}"
+
+        else:
+            if len(self.shape) != len(var_shape) or self.shape != var_shape:
+                is_error = True
+
+        if is_error:
+            log_prefix = " ".join(args)
+            return f"{log_prefix} Variable: {self.name} doesn't correspond to pattern, expected: " \
+                   f"{self.shape}, actual: {str(var_shape)}"
 
         return ""
+
+    def _is_leap(self, year, file_format):
+        return True if year in file_format.leap_years() else False

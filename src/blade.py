@@ -2,17 +2,25 @@ import glob
 import logging
 import os
 
-from src.experiment import Experiment
+from src.experiment import (
+    Experiment,
+    WRFExperiment
+)
 from src.ftp import missed_years
 
 TEMP_DIR = "../temp_missed"
 
+nemo14_dir = '/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/coarse_grid/'
+wrf_dir = '/home/hpc-rosneft/nfs/0_41/share_2/output_data/Output/Arctic/WRF/'
+
 
 class BladeChecker:
-    def __init__(self, date_from, date_to):
-        self._storage_path = os.environ['STORAGE_PATH']
+    def __init__(self, date_from, date_to, file_format):
+        # self._storage_path = os.environ['STORAGE_PATH']
+        self._storage_path = wrf_dir
         self._date_from = date_from
         self._date_to = date_to
+        self.file_format = file_format
         self.init_logging()
         self.experiment = ""
 
@@ -23,7 +31,8 @@ class BladeChecker:
         logging.info('Started')
         files = self.get_all_netcdf_files()
         print("files amount : %d" % len(files))
-        self.experiment = Experiment(date_from=self._date_from, date_to=self._date_to, resulted_files=[files])
+        self.experiment = Experiment(date_from=self._date_from, date_to=self._date_to,
+                                     resulted_files=[files], file_format=self.file_format)
 
         if mode == "absence":
             errors = self.experiment.check_for_absence()
@@ -47,8 +56,16 @@ class BladeChecker:
 
     def get_all_netcdf_files(self):
         files = []
-        for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
-            files.append(file_name)
+        # TODO: temporary solution, refactor this later
+        dirs = [str(year) for year in range(2004, 2009)]
+
+        for dir in dirs:
+            for file_name in glob.iglob(
+                    self._storage_path + f"{dir}/*.nc", recursive=True):
+                files.append(file_name)
+
+        # for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
+        #     files.append(file_name)
         return files
 
     def check_storage_with_ftp(self, storage, mode='absence', summary=False):
@@ -56,7 +73,8 @@ class BladeChecker:
         files = self.combined_file_names(storage)
         print("files amount : %d" % len(files))
 
-        self.experiment = Experiment(date_from=self._date_from, date_to=self._date_to, resulted_files=[files])
+        self.experiment = Experiment(date_from=self._date_from, date_to=self._date_to,
+                                     resulted_files=[files], file_format=self.file_format)
 
         if mode == 'absence':
             errors = self.experiment.check_for_absence()
@@ -91,6 +109,39 @@ class BladeChecker:
 
         return files
 
+    def check_wrf_files(self, mode='absence', summary=False):
+        logging.info('Started')
+
+        files = self.wrf_yearly_files()
+
+        self.experiment = WRFExperiment(year_from=self._date_from.year, year_to=self._date_to.year,
+                                        resulted_files=files, file_format=self.file_format)
+        if mode == 'absence':
+            errors = self.experiment.check_for_absence()
+            if summary:
+                self.summary(errors, [])
+
+            logging.info('Finished')
+            return errors
+
+        else:
+            absence_errors = self.experiment.check_for_absence()
+            vars_errors = self.experiment.check_variables()
+
+            if summary:
+                self.summary(absence_errors, vars_errors)
+
+            logging.info('Finished')
+
+            return absence_errors + vars_errors
+
+    def wrf_yearly_files(self):
+        files = []
+        for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
+            files.append(file_name)
+
+        return files
+
     # TODO: extract class or/and Error class
     def summary(self, absence_errors, vars_errors):
         self.dump_matching_errors()
@@ -113,10 +164,12 @@ class BladeChecker:
             wrong_shape = list(filter(lambda error: error if "doesn't correspond to" in error else None, vars_errors))
             missing_vars = list(
                 filter(lambda error: error if "variable is not presented" in error else None, vars_errors))
+            nan_values = list(filter(lambda error: error if "has NaN-value" in error else None, vars_errors))
 
             file.write('\twith constant values: %d\n' % len(with_constants))
             file.write('\twith wrong shape: %d\n' % len(wrong_shape))
             file.write('\twith missing variable: %d\n' % len(missing_vars))
+            file.write('\twith NaNs: %d\n' % len(nan_values))
 
     def dump_matching_errors(self):
         with open('../logs/matching_errors.log', 'w') as file:
