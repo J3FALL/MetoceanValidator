@@ -146,7 +146,7 @@ class BladeChecker:
 
     def check_wave_watch_files(self, mode='absence', summary=False):
 
-        files = self.wrf_yearly_files()
+        files = self.wave_watch_monthly_files()
 
         self.experiment = WaveWatchExperiment(year_from=self._date_from.year, year_to=self._date_to.year,
                                               resulted_files=files, file_format=self.file_format)
@@ -158,6 +158,16 @@ class BladeChecker:
 
             logging.info('Finished')
             return errors
+        else:
+            absence_errors = self.experiment.check_for_absence()
+            vars_errors = self.experiment.check_variables()
+
+            if summary:
+                self.summary(absence_errors, vars_errors)
+
+            logging.info('Finished')
+
+            return absence_errors + vars_errors
 
     def wave_watch_monthly_files(self):
         files = []

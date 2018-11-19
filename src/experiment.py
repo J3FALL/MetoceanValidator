@@ -288,7 +288,7 @@ class WaveWatchExperiment:
             _, year, month = results[idx]
 
             if matched_day == (year, month):
-                results[idx] = (NCFile(name=file_name, path=path, type='wrf'), year, month)
+                results[idx] = (NCFile(name=file_name, path=path, type='waves'), year, month)
 
     def check_for_absence(self):
         errors = []
@@ -301,3 +301,32 @@ class WaveWatchExperiment:
                 errors.append(error)
 
         return errors
+
+    def check_variables(self):
+        errors = []
+        for monthly_file, year, month in tqdm(self.results_by_years):
+
+            if monthly_file is not MISSING_FILE:
+                error = self.check_month(monthly_file)
+                errors.extend(error)
+
+        return errors
+
+    def check_month(self, file):
+
+        errors_for_month = []
+        integrity_error = file.check_for_integrity()
+        if integrity_error is "":
+            var_errors = file.check_variables(self.file_format)
+            errors_for_month.extend(var_errors)
+        else:
+            errors_for_month.append(integrity_error)
+
+        total = self._errors_in_total(errors_for_month)
+        for error in total:
+            logging.error(error)
+
+        return total
+
+    def _errors_in_total(self, errors_for_day):
+        return list(filter(lambda error: error if error is not "" else None, errors_for_day))

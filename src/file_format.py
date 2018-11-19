@@ -27,7 +27,7 @@ class FileFormat:
         for type in types:
             vars_by_type[type] = []
             for var in self._formats['files'][type]['vars']:
-                vars_by_type[type].append(Variable(var['name'], var['shape']))
+                vars_by_type[type].append(Variable(var['name'], var['shapes']))
 
         return vars_by_type
 
@@ -90,43 +90,22 @@ class FileFormat:
 
 
 class Variable:
-    def __init__(self, name, shape):
+    def __init__(self, name, shapes):
         self.name = name
-        self.shape = shape
+        self.shapes = shapes
 
-    def match(self, var, *args, **kwargs):
+    def match(self, var, *args):
         var_shape = list(var.shape)
 
-        is_error = False
+        is_invalid = True
+        for valid_shape in self.shapes:
+            if len(valid_shape) == len(var_shape) and valid_shape == var_shape:
+                is_invalid = False
 
-        # Dirty hack with wrf leap years
-        if 'wrf' in kwargs:
-
-            if len(self.shape) != len(var_shape) or self.shape[1:] != var_shape[1:]:
-                is_error = True
-            else:
-                if len(self.shape) > 2:
-                    year = kwargs['year']
-                    file_format = kwargs['file_format']
-                    time_idx = 0
-                    if (self._is_leap(year, file_format) and self.shape[time_idx] < 8784) or \
-                            (not self._is_leap(year, file_format) and self.shape[time_idx] < 8760):
-                        log_prefix = " ".join(args)
-
-                        shape_to_print = self.shape
-                        shape_to_print[time_idx] = 8784 if self._is_leap(year, file_format) else 8760
-                        print(year, shape_to_print, var_shape)
-                        return f"{log_prefix} Variable: {self.name} doesn't correspond to pattern, expected: " \
-                               f"{shape_to_print}, actual: {str(var_shape)}"
-
-        else:
-            if len(self.shape) != len(var_shape) or self.shape != var_shape:
-                is_error = True
-
-        if is_error:
+        if is_invalid:
             log_prefix = " ".join(args)
             return f"{log_prefix} Variable: {self.name} doesn't correspond to pattern, expected: " \
-                   f"{self.shape}, actual: {str(var_shape)}"
+                   f"{self.shapes}, actual: {str(var_shape)}"
 
         return ""
 
