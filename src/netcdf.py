@@ -30,7 +30,7 @@ class NCFile:
             for correct_var in file_format.variables(self.type):
                 try:
                     var = nc_file.variables[correct_var.name]
-                    error = self.check_shape(var, correct_var, self.name, file_format)
+                    error = self.check_shape(var, correct_var, self.name)
                     if error is not "":
                         errors.append(error)
 
@@ -44,11 +44,8 @@ class NCFile:
 
         return errors
 
-    def check_shape(self, var, correct_var, file_name, file_format):
-        if self.type is not 'wrf':
-            return correct_var.match(var, file_name)
-        else:
-            return correct_var.match(var, file_name, wrf=True, year=self._parse_year(), file_format=file_format)
+    def check_shape(self, var, correct_var, file_name):
+        return correct_var.match(var, file_name)
 
     def _parse_year(self):
         '''

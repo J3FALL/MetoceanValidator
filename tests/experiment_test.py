@@ -1,8 +1,11 @@
 import unittest
 from datetime import date
 
-from src.experiment import Experiment
-from src.experiment import WRFExperiment
+from src.experiment import (
+    Experiment,
+    WRFExperiment,
+    WaveWatchExperiment
+)
 from src.file_format import FileFormat
 
 
@@ -69,3 +72,29 @@ class WRFExperimentTest(unittest.TestCase):
 
         self.assertEqual(len(errors), expected_missed_years)
         self.assertIn(expected_error, errors)
+
+
+class WaveWatchExperimentTest(unittest.TestCase):
+    def test_check_for_absence_correct(self):
+        files = [f'../ww3.2000{month:02}.nc' for month in range(1, 13)]
+
+        exp = WaveWatchExperiment(year_from=2000, year_to=2000,
+                                  resulted_files=files, file_format=FileFormat('../formats/ww3-formats.yaml'))
+
+        errors = exp.check_for_absence()
+
+        self.assertEqual(len(errors), 0)
+
+    def test_check_for_absence_missing_months(self):
+        files = [f'../ww3.2000{month:02}.nc' for month in range(1, 7)]
+
+        exp = WaveWatchExperiment(year_from=2000, year_to=2000,
+                                  resulted_files=files, file_format=FileFormat('../formats/ww3-formats.yaml'))
+
+        errors = exp.check_for_absence()
+
+        expected_missing_month = 6
+        expected_error = 'Simulation results were not found for : year = 2000, month = 7'
+
+        self.assertEqual(len(errors), expected_missing_month)
+        self.assertIn(expected_error, errors[0])

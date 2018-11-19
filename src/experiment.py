@@ -236,3 +236,97 @@ class WRFExperiment:
 
     def _errors_in_total(self, errors_for_day):
         return list(filter(lambda error: error if error is not "" else None, errors_for_day))
+
+
+class WaveWatchExperiment:
+    def __init__(self, year_from, year_to, resulted_files, file_format):
+        self._year_from = year_from
+        self._year_to = year_to
+        self.file_format = file_format
+
+        self.results = sorted(resulted_files)
+
+        self.matching_log = []
+        self.results_by_years = self._match_results()
+
+    def _match_results(self):
+        results_by_years = self._blank_results()
+
+        for file in self.results:
+            file_name = self.path_leaf(file)
+            type, error = self.file_format.match_type(file_name)
+            if error is not '':
+                self.matching_log.append(error)
+            else:
+                date, _ = self.file_format.match(file_name, type)
+                year, month = date
+                if not self.year_between(year):
+                    print(f"{file_name} is outside the ({self._year_from}, {self._year_to}) experiment period")
+                else:
+                    self._fill_month(results_by_years, file, file_name, date)
+
+        return results_by_years
+
+    def _blank_results(self):
+        results = []
+
+        for year in range(self._year_from, self._year_to + 1):
+            for month in range(1, 13):
+                results.append((MISSING_FILE, year, month))
+
+        return results
+
+    def path_leaf(self, path):
+        head, tail = os.path.split(path)
+        return tail
+
+    def year_between(self, year):
+        return self._year_from <= year <= self._year_to
+
+    def _fill_month(self, results, path, file_name, matched_day):
+        for idx in range(len(results)):
+            _, year, month = results[idx]
+
+            if matched_day == (year, month):
+                results[idx] = (NCFile(name=file_name, path=path, type='waves'), year, month)
+
+    def check_for_absence(self):
+        errors = []
+
+        for results in self.results_by_years:
+            file, year, month = results
+            if file is MISSING_FILE:
+                error = f"Simulation results were not found for : year = {year}, month = {month}"
+                logging.info(error)
+                errors.append(error)
+
+        return errors
+
+    def check_variables(self):
+        errors = []
+        for monthly_file, year, month in tqdm(self.results_by_years):
+
+            if monthly_file is not MISSING_FILE:
+                error = self.check_month(monthly_file)
+                errors.extend(error)
+
+        return errors
+
+    def check_month(self, file):
+
+        errors_for_month = []
+        integrity_error = file.check_for_integrity()
+        if integrity_error is "":
+            var_errors = file.check_variables(self.file_format)
+            errors_for_month.extend(var_errors)
+        else:
+            errors_for_month.append(integrity_error)
+
+        total = self._errors_in_total(errors_for_month)
+        for error in total:
+            logging.error(error)
+
+        return total
+
+    def _errors_in_total(self, errors_for_day):
+        return list(filter(lambda error: error if error is not "" else None, errors_for_day))

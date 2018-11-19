@@ -4,7 +4,8 @@ import os
 
 from src.experiment import (
     Experiment,
-    WRFExperiment
+    WRFExperiment,
+    WaveWatchExperiment
 )
 from src.ftp import missed_years
 
@@ -12,12 +13,13 @@ TEMP_DIR = "../temp_missed"
 
 nemo14_dir = '/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/coarse_grid/'
 wrf_dir = '/home/hpc-rosneft/nfs/0_41/share_2/output_data/Output/Arctic/WRF/'
+ww3_dir = '/home/hpc-rosneft/nfs/0_41/share_2/ww3_data/output/'
 
 
 class BladeChecker:
     def __init__(self, date_from, date_to, file_format):
         # self._storage_path = os.environ['STORAGE_PATH']
-        self._storage_path = wrf_dir
+        self._storage_path = ww3_dir
         self._date_from = date_from
         self._date_to = date_to
         self.file_format = file_format
@@ -138,6 +140,38 @@ class BladeChecker:
     def wrf_yearly_files(self):
         files = []
         for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
+            files.append(file_name)
+
+        return files
+
+    def check_wave_watch_files(self, mode='absence', summary=False):
+
+        files = self.wave_watch_monthly_files()
+
+        self.experiment = WaveWatchExperiment(year_from=self._date_from.year, year_to=self._date_to.year,
+                                              resulted_files=files, file_format=self.file_format)
+
+        if mode == 'absence':
+            errors = self.experiment.check_for_absence()
+            if summary:
+                self.summary(errors, [])
+
+            logging.info('Finished')
+            return errors
+        else:
+            absence_errors = self.experiment.check_for_absence()
+            vars_errors = self.experiment.check_variables()
+
+            if summary:
+                self.summary(absence_errors, vars_errors)
+
+            logging.info('Finished')
+
+            return absence_errors + vars_errors
+
+    def wave_watch_monthly_files(self):
+        files = []
+        for file_name in glob.iglob(self._storage_path + '**/*.nc', recursive=True):
             files.append(file_name)
 
         return files
