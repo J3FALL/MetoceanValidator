@@ -17,4 +17,4 @@ from src.file_format import FileFormat
 
 checker = BladeChecker(date_from=date(1965, 1, 1), date_to=date(2015, 12, 31),
                        file_format=FileFormat(format_file='../formats/ww3-formats.yaml'))
-checker.check_wave_watch_files()
+checker.check_wave_watch_files(mode='absence', summary=True)

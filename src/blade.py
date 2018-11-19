@@ -4,7 +4,8 @@ import os
 
 from src.experiment import (
     Experiment,
-    WRFExperiment
+    WRFExperiment,
+    WaveWatchExperiment
 )
 from src.ftp import missed_years
 
@@ -143,9 +144,20 @@ class BladeChecker:
 
         return files
 
-    def check_wave_watch_files(self):
+    def check_wave_watch_files(self, mode='absence', summary=False):
 
         files = self.wrf_yearly_files()
+
+        self.experiment = WaveWatchExperiment(year_from=self._date_from.year, year_to=self._date_to.year,
+                                              resulted_files=files, file_format=self.file_format)
+
+        if mode == 'absence':
+            errors = self.experiment.check_for_absence()
+            if summary:
+                self.summary(errors, [])
+
+            logging.info('Finished')
+            return errors
 
     def wave_watch_monthly_files(self):
         files = []
