@@ -1,16 +1,16 @@
 # nemo-error-checker
 
-A tool for finding errors in ocean simulation results obtained with different metocean models.
+A tool for finding errors in hydrometeorological simulation results obtained with different metocean models.
 
 [![Build Status](https://travis-ci.com/J3FALL/nemo-error-checker.svg?branch=master)](https://travis-ci.com/J3FALL/nemo-error-checker)
 
-This tool is considered to be a part of Metocean Simulation Results Verification Framework. 
+This tool is considered to be a part of Metocean Simulation Results Validation Framework. 
 The experiments are based mainly on simulation results obtained with 3 models:
 - NEMO (ocean model)+ LIM3 module (ice model): Ice aggregation and dynamics, tracers (sea surface height, temperature, salinity), currents
 - WRF (atmosphere model): pressure, temperature, directions
 - WaveWatch III (ocean wave model): significant height of wind and swell, mean direction and frequency, directions
 
-The tool focuses on technical verification of simulation results, such as:
+The tool focuses on technical validation of simulation results, such as:
 - Search for some missing resulted files
 - Search for some for fully-corrupted files or with incorrect meta-data
 - Check for the presence of all variables
