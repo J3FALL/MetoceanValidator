@@ -10,7 +10,7 @@ from src.valid import ValidResults
 class ValidResultsTest(unittest.TestCase):
 
     def test_valid_results(self):
-        results = ValidResults(file_format=FileFormat("../formats/formats.yaml"))
+        results = ValidResults(file_format=FileFormat("../formats/nemo5-formats.yaml"))
 
         date_from = date(2013, 1, 1)
         date_to = date(2013, 1, 3)
