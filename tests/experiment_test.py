@@ -18,7 +18,7 @@ class ExperimentTest(unittest.TestCase):
                    ['ARCTIC_1h_ice_grid_TUV_20130101-20130101.nc', 'ARCTIC_1h_T_grid_T_20130101-20130101.nc',
                     'ARCTIC_1h_UV_grid_UV_20130101-20130101.nc']]
 
-        format = FileFormat(format_file="../formats/formats.yaml")
+        format = FileFormat(format_file="../formats/nemo5-formats.yaml")
         experiment = Experiment(date_from=date(2013, 1, 1), date_to=date(2013, 1, 3),
                                 resulted_files=results, file_format=format)
 
@@ -29,7 +29,7 @@ class ExperimentTest(unittest.TestCase):
                     'ARCTIC_1h_UV_grid_UV_20130102-20130102.nc'],
                    ['ARCTIC_1h_ice_grid_TUV_20130103-20130103.nc', 'ARCTIC_1h_T_grid_T_20130103-20130103.nc',
                     'ARCTIC_1h_UV_grid_UV_20130103-20130103.nc']]
-        format = FileFormat(format_file="../formats/formats.yaml")
+        format = FileFormat(format_file="../formats/nemo5-formats.yaml")
         experiment = Experiment(date_from=date(2013, 1, 1), date_to=date(2013, 1, 3),
                                 resulted_files=results, file_format=format)
 
@@ -41,7 +41,7 @@ class ExperimentTest(unittest.TestCase):
 
     def test_check_for_absence_missing_file(self):
         results = [['ARCTIC_1h_T_grid_T_20130101-20130101.nc', 'ARCTIC_1h_UV_grid_UV_20130101-20130101.nc']]
-        format = FileFormat(format_file="../formats/formats.yaml")
+        format = FileFormat(format_file="../formats/nemo5-formats.yaml")
 
         experiment = Experiment(date_from=date(2013, 1, 1), date_to=date(2013, 1, 1),
                                 resulted_files=results, file_format=format)

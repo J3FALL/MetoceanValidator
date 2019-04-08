@@ -19,7 +19,7 @@ class BladeTest(unittest.TestCase):
 
     def setUp(self):
         self.checker = BladeChecker(date_from=date(2013, 1, 1), date_to=date(2013, 1, 3),
-                                    file_format=FileFormat('../formats/formats.yaml'))
+                                    file_format=FileFormat('../formats/nemo5-formats.yaml'))
 
     @patch('src.blade.BladeChecker.get_all_netcdf_files', return_value=mocked_nc_files)
     def test_check_local_storage_for_absence_correct(self, _):
