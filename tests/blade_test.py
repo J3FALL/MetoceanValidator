@@ -23,4 +23,4 @@ class BladeTest(unittest.TestCase):
 
     @patch('src.blade.BladeChecker.get_all_netcdf_files', return_value=mocked_nc_files)
     def test_check_local_storage_for_absence_correct(self, _):
-        self.assertEqual(len(self.checker.check_local_storage(mode="absence")), 0)
+        self.assertEqual(len(self.checker.check_nemo_files(mode="absence")), 0)

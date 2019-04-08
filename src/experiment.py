@@ -130,6 +130,9 @@ class Experiment:
             errors_for_day = []
 
             for var in [day.ice, day.tracers, day.currents]:
+
+                if var.name == '':
+                    continue
                 integrity_error = var.check_for_integrity()
 
                 if integrity_error is "":

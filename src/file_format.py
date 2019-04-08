@@ -17,7 +17,6 @@ class FileFormat:
                 loaded = yaml.load(stream)
                 return loaded
             except yaml.YAMLError as exc:
-                print(exc)
                 logging.info(exc)
 
     def init_vars_formats(self):

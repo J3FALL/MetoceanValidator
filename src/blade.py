@@ -11,15 +11,18 @@ from src.ftp import missed_years
 
 TEMP_DIR = "../temp_missed"
 
-nemo14_dir = '/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/coarse_grid/'
+# nemo14_dir = '/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/coarse_grid/'
 wrf_dir = '/home/hpc-rosneft/nfs/0_41/share_2/output_data/Output/Arctic/WRF/'
 ww3_dir = '/home/hpc-rosneft/nfs/0_41/share_2/ww3_data/output/'
 
 
+# nemo_tmp_dir = '/home/hpc-rosneft/nfs/0_41/share_2/NEMO-TEMP/'
+
+
 class BladeChecker:
     def __init__(self, date_from, date_to, file_format):
-        # self._storage_path = os.environ['STORAGE_PATH']
-        self._storage_path = ww3_dir
+        self._storage_path = os.environ['STORAGE_PATH']
+        # self._storage_path = nemo_tmp_dir
         self._date_from = date_from
         self._date_to = date_to
         self.file_format = file_format
@@ -29,7 +32,7 @@ class BladeChecker:
     def init_logging(self):
         logging.basicConfig(filename='../logs/errors.log', level=logging.INFO, filemode='w')
 
-    def check_local_storage(self, mode="absence", summary=False):
+    def check_nemo_files(self, mode="absence", summary=False):
         logging.info('Started')
         files = self.get_all_netcdf_files()
         print("files amount : %d" % len(files))
@@ -59,15 +62,19 @@ class BladeChecker:
     def get_all_netcdf_files(self):
         files = []
         # TODO: temporary solution, refactor this later
-        dirs = [str(year) for year in range(2004, 2009)]
+        dirs = [str(year) for year in range(1964, 2016)]
 
         for dir in dirs:
             for file_name in glob.iglob(
-                    self._storage_path + f"{dir}/*.nc", recursive=True):
+                    self._storage_path + f"L2-{dir}/*/*.nc", recursive=True):
+                files.append(file_name)
+            for file_name in glob.iglob(
+                    self._storage_path + f"L2-{dir}/*.nc", recursive=True):
                 files.append(file_name)
 
         # for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
         #     files.append(file_name)
+
         return files
 
     def check_storage_with_ftp(self, storage, mode='absence', summary=False):
