@@ -1,6 +1,6 @@
-# nemo-error-checker
+# MetoceanValidator
 
-A tool for finding errors in hydrometeorological simulation results obtained with different metocean models.
+A tool for errors detection in hydrometeorological simulation results obtained with different metocean models.
 
 [![Build Status](https://travis-ci.com/J3FALL/nemo-error-checker.svg?branch=master)](https://travis-ci.com/J3FALL/nemo-error-checker)
 
