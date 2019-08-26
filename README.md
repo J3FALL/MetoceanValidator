@@ -2,7 +2,7 @@
 
 A tool for errors detection in hydrometeorological simulation results obtained with different metocean models.
 
-[![Build Status](https://travis-ci.com/J3FALL/nemo-error-checker.svg?branch=master)](https://travis-ci.com/J3FALL/nemo-error-checker)
+[![Build Status](https://travis-ci.com/J3FALL/MetoceanValidator.svg?branch=master)](https://travis-ci.com/J3FALL/MetoceanValidator)
 
 This tool is considered to be a part of Metocean Simulation Results Validation Framework. 
 The experiments are based mainly on simulation results obtained with 3 models:
