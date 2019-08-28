@@ -29,7 +29,7 @@ def missed_days(log_file_path):
     with open(log_file_path, 'r') as log_file:
         for line in log_file:
             for match in re.finditer(pattern, line):
-                date = match.groups()
+                date = match.groups()[0]
                 missed.append(date)
     return missed
 

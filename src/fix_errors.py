@@ -18,7 +18,8 @@ file_name_templates = [
 ]
 
 from src.logs_parser import (
-    missed_files
+    missed_files,
+    missed_days
 )
 
 
@@ -135,5 +136,25 @@ def fix_missed_files_in_nfs(storage_path, log_path='../coarse_1975-1980.log'):
                 print(f'FIXED: {file_to_fix}')
 
 
+def fix_missed_days_in_nfs(storage_path, log_path='../coarse_1975-1980.log'):
+    missed = missed_days(log_path)
+
+    for day in missed:
+        date = datetime.datetime.strptime(day, '%Y%m%d')
+        prev_day = date - datetime.timedelta(days=1)
+        prev_day_raw = prev_day.strftime('%Y%m%d')
+
+        prev_files = []
+        for pattern in file_name_templates:
+            prev_files.append(pattern.substitute(date=prev_day_raw))
+
+        ice, tracers, currents = prev_files
+
+        fix_missed_day(directory=f'{storage_path}/{date.year}',
+                       ice=ice, tracers=tracers, currents=currents)
+        print(f'Fixed missed day: {day}')
+
+
 if __name__ == '__main__':
-    fix_missed_files_in_nfs(storage_path, '../coarse_1974-2015.log')
+    # fix_missed_files_in_nfs(storage_path, '../coarse_1974-2015.log')
+    fix_missed_days_in_nfs(storage_path, '../coarse_1974-2015.log')
