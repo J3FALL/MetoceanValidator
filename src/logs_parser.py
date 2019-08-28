@@ -56,15 +56,3 @@ def ice_cat_errors_files(log_file_path):
                 file_name = match.groups()[0]
                 ice_files.append(file_name)
     return ice_files
-
-
-if __name__ == '__main__':
-    coarse_log = '../coarse_1970-75.log'
-    missed = missed_files(coarse_log)
-    print(f'missed_files: {len(missed)}')
-    missed = missed_days(coarse_log)
-    print(f'missed_days: {len(missed)}')
-    corrupted = corrupted_files(coarse_log)
-    print(f'corrupted_files: {len(corrupted)}')
-    ice_files = ice_cat_errors_files(coarse_log)
-    print(f'ice categories files: {len(ice_files)}')
