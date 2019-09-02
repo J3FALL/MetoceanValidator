@@ -1,9 +1,13 @@
 import datetime
+import os
 import re
 from shutil import copyfile
 from string import Template
 
 from netCDF4 import Dataset as NetCDF
+from tqdm import tqdm
+
+from src.ice_convert import ice_with_8_categories
 
 file_name_patterns = [
     'ARCTIC_1h_ice_grid_TUV_(\\d{8})-(\\d{8}).nc',
@@ -19,7 +23,8 @@ file_name_templates = [
 
 from src.logs_parser import (
     missed_files,
-    missed_days
+    missed_days,
+    ice_cat_errors_files
 )
 
 
@@ -155,6 +160,43 @@ def fix_missed_days_in_nfs(storage_path, log_path='../coarse_1975-1980.log'):
         print(f'Fixed missed day: {day}')
 
 
+correct_ice_file = 'ARCTIC_1h_ice_grid_TUV_19760101-19760101.nc'
+
+
+def fix_ice_categories(storage_path, log_path='../coarse_1975-1980.log', cpu_count=4):
+    ice_files = ice_cat_errors_files(log_path)
+
+    for file in tqdm(ice_files):
+        print(f'File to fix: {file}')
+        date_raw = extracted_date_by_pattern(file)
+        date = datetime.datetime.strptime(date_raw, '%Y%m%d')
+
+        file_path = f'{storage_path}/{date.year}/{file}'
+
+        tmp_path = f'../tmp_fixed/{date.year}'
+
+        if not os.path.exists(tmp_path):
+            os.mkdir(tmp_path)
+
+        copyfile(f'{storage_path}/1976/{correct_ice_file}', f'{tmp_path}/{file}')
+
+        fixed_file = NetCDF(f'{tmp_path}/{file}', mode='r+')
+        file_with_errors = NetCDF(file_path, mode='r')
+
+        for var_name in file_with_errors.variables:
+            if var_name not in ['siconcat', 'sithicat', 'ncatice']:
+                fixed_file[var_name][:] = file_with_errors[var_name][:]
+                print(f'Variable: {var_name} was copied')
+        file_with_errors.close()
+
+        conc_fixed, thic_fixed = ice_with_8_categories(file_path=file_path, cpu_count=cpu_count)
+
+        fixed_file['siconcat'][:] = conc_fixed
+        fixed_file['sithicat'][:] = thic_fixed
+        fixed_file.close()
+
+
 if __name__ == '__main__':
     # fix_missed_files_in_nfs(storage_path, '../coarse_1974-2015.log')
-    fix_missed_days_in_nfs(storage_path, '../coarse_1974-2015.log')
+    # fix_missed_days_in_nfs(storage_path, '../coarse_1974-2015.log')
+    fix_ice_categories(storage_path, '../coarse_1974-2015.log', cpu_count=8)

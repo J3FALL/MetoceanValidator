@@ -1,22 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Aug 26 14:12:10 2019
-
-@author: user
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu May 17 13:02:33 2018
-
-@author: user
-"""
-
 import time
 from multiprocessing import Pool
 
 import netCDF4 as nc
 import numpy as np
+from numpy.ma import MaskedArray
 from tqdm import tqdm
 
 h_max_8 = np.array([0, 0.1, 0.3, 0.7, 1.2, 2.5, 4, 5.5])
@@ -95,26 +82,39 @@ def convert_5_8_wrapper_vect(v1):
     return t1, point_y, point_x, conc_vect_8, thic_vect_8
 
 
-def convert_file(name, cpu_count=2):
-    with Pool(processes=cpu_count) as p:
-        ncid = nc.Dataset(name, 'r+')
-        icethicavg_8 = np.zeros((24, 8, 452, 406))
-        iceconcavg_8 = np.zeros((24, 8, 452, 406))
-        ice_conc_5 = ncid['siconcat'][:, :, :, :]
-        ice_thic_5 = ncid['sithicat'][:, :, :, :]
+def ice_with_8_categories(file_path, cpu_count=2):
+    print('Pool has been created')
+    ncid = nc.Dataset(file_path, 'r+')
+    icethicavg_8 = np.zeros((24, 8, 452, 406))
+    iceconcavg_8 = np.zeros((24, 8, 452, 406))
+    ice_conc_5 = ncid['siconcat'][:, :, :, :]
+    ice_thic_5 = ncid['sithicat'][:, :, :, :]
+
+    ncid.close()
+    if isinstance(ice_conc_5, MaskedArray):
         ice_conc_5 = ice_conc_5.filled(0)
         ice_thic_5 = ice_thic_5.filled(0)
-        v = generate_vectors(ice_conc_5, ice_thic_5)
-        #        for i in p.imap_unordered(disp_ev, x_list):
-        #            print(i)
+
+    print('Starting to generate vectors')
+    v = generate_vectors(ice_conc_5, ice_thic_5)
+    print('Finished to generate vectors')
+
+    out_values = []
+    with Pool(processes=cpu_count) as p:
+
         with tqdm(total=len(v)) as progress_bar:
             for _, out in tqdm(enumerate(p.imap(convert_5_8_wrapper_vect, v))):
-                iceconcavg_8[out[0], :, out[1], out[2]] = out[3]
-                icethicavg_8[out[0], :, out[1], out[2]] = out[4]
+                out_values.append(out)
                 progress_bar.update()
+    print('Starting to fill ice values')
+    for out in out_values:
+        iceconcavg_8[out[0], :, out[1], out[2]] = out[3]
+        icethicavg_8[out[0], :, out[1], out[2]] = out[4]
+    print('Converting: done')
+
     return icethicavg_8, iceconcavg_8
 
 
 if __name__ == '__main__':
-    name = 'ARCTIC_1h_ice_grid_TUV_19750101-19750101.nc'
-    icethicavg_8, iceconcavg_8 = convert_file(name, cpu_count=5)
+    path = '../ARCTIC_1h_ice_grid_TUV_19740102-19740102.nc'
+    icethicavg_8, iceconcavg_8 = ice_with_8_categories(path, cpu_count=2)
