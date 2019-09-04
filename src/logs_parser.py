@@ -1,7 +1,7 @@
 import re
 
 MISSED_FILES_PATTERN = '\w*Simulation results for day: ([0-9]{8}) have some missing files or its names are incorrect:' \
-                       ' date: [0-9]{8}, ice_file: ([\w\W]*), tracers_file: ([\w\W]*), currents_file: ([\w\W]*)\n'
+                       ' date: [0-9]{8}, ice_file: ([\w\W]*), tracers_file: ([\w\W]*), currents_file:([\w\W]*)\n'
 
 MISSED_DAY_PATTERN = '\w*Simulation results were not found for day: ([0-9]{8})'
 

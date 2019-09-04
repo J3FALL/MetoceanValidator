@@ -83,7 +83,6 @@ def convert_5_8_wrapper_vect(v1):
 
 
 def ice_with_8_categories(file_path, cpu_count=2):
-    print('Pool has been created')
     ncid = nc.Dataset(file_path, 'r+')
     icethicavg_8 = np.zeros((24, 8, 452, 406))
     iceconcavg_8 = np.zeros((24, 8, 452, 406))
@@ -101,7 +100,7 @@ def ice_with_8_categories(file_path, cpu_count=2):
 
     out_values = []
     with Pool(processes=cpu_count) as p:
-
+        print('Pool has been created')
         with tqdm(total=len(v)) as progress_bar:
             for _, out in tqdm(enumerate(p.imap(convert_5_8_wrapper_vect, v))):
                 out_values.append(out)
