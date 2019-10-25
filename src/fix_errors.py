@@ -1,6 +1,8 @@
 import datetime
+import glob
 import os
 import re
+import shutil
 from shutil import copyfile
 from string import Template
 
@@ -196,7 +198,100 @@ def fix_ice_categories(storage_path, log_path='../coarse_1975-1980.log', cpu_cou
         fixed_file.close()
 
 
+def all_files_with_day_artifact(storage_path):
+    artifact_pattern = 'ARCTIC_1h_ice_grid_TUV_(\\d{8})-(\\d{6}){day}.nc'
+    pattern = re.compile(artifact_pattern)
+
+    files_with_artifacts = []
+    for file_name in glob.iglob(storage_path, recursive=True):
+        matches = re.search(pattern, file_name)
+        if matches is not None and len(matches.groups()) > 0:
+            files_with_artifacts.append(file_name)
+            print(file_name)
+
+    return files_with_artifacts
+
+
+def dump_all_files_with_artifacts(files):
+    with open('files_dumped.txt', 'w') as file_dump:
+        for file in files:
+            file_dump.write(f'{file}\n')
+
+
+def fix_files_with_day_artifact(storage_path):
+    src_files = all_files_with_day_artifact(storage_path)
+    dump_all_files_with_artifacts(src_files)
+
+    temporary_dir = '../artifacts_temp'
+    if not os.path.exists(temporary_dir):
+        os.mkdir(temporary_dir)
+    print(f'Starting to move all files with artifacts to: {temporary_dir}')
+    move_to_tmp_directory(src_files, temporary_dir)
+    print('Copying: Done')
+
+    artifact_pattern = 'ARCTIC_1h_ice_grid_TUV_(\\d{8})-(\\d{6}){day}.nc'
+
+    date_from = datetime.datetime(1900, 1, 1, 0, 0)
+
+    artifact_files = [os.path.join(temporary_dir, file_name_from_path(file)) for file in src_files]
+
+    fixed_files_dir = '../fixed_tmp'
+    if not os.path.exists(fixed_files_dir):
+        os.mkdir(fixed_files_dir)
+
+    for file in artifact_files:
+        print(f'File to fix: {file}')
+        extracted_date = re.search(artifact_pattern, file).groups()[0]
+        correct_date = datetime.datetime.strptime(extracted_date, '%Y%m%d')
+        correct_seconds = int((correct_date - date_from).total_seconds())
+
+        date_to_substitute = {'date': extracted_date}
+        file_to_fix = Template('ARCTIC_1h_ice_grid_TUV_$date-$date.nc').substitute(date_to_substitute)
+        fixed_path = os.path.join(fixed_files_dir, file_to_fix)
+        copyfile(file, fixed_path)
+        print(f'Fixing corresponding file: {file_to_fix}')
+        nc_file = NetCDF(fixed_path, 'r+')
+        actual_time = int(nc_file.variables['time_counter_bounds'][0][0])
+        time_delta = correct_seconds - actual_time
+
+        for var_name in ['time_counter', 'time_counter_bounds', 'time_centered', 'time_centered_bounds']:
+            if time_delta > 0:
+                nc_file[var_name][:] += time_delta
+            else:
+                nc_file[var_name][:] -= time_delta
+        nc_file.close()
+        print('Done')
+
+    files_to_move = os.listdir(fixed_files_dir)
+    print(f'Starting to move fixed files to: {fixed_files_dir}')
+    for idx in range(len(files_to_move)):
+        name = file_name_from_path(files_to_move[idx])
+        root, _ = os.path.split(src_files[idx])
+
+        path_full = os.path.join(root, name)
+        print(path_full)
+        shutil.move(os.path.join(fixed_files_dir, name), path_full)
+
+
+def move_to_tmp_directory(files, tmp_dir):
+    if not os.path.exists(tmp_dir):
+        os.mkdir(tmp_dir)
+
+    for file in files:
+        copy_to = os.path.join(tmp_dir, file_name_from_path(file))
+        print(copy_to)
+        shutil.move(file, copy_to)
+
+
+def file_name_from_path(file_path):
+    _, name = os.path.split(file_path)
+
+    return name
+
+
 if __name__ == '__main__':
     # fix_missed_files_in_nfs(storage_path, '../coarse_1974-2015.log')
     # fix_missed_days_in_nfs(storage_path, '../coarse_1974-2015.log')
-    fix_ice_categories(storage_path, '../coarse_1974-2015.log', cpu_count=8)
+    # fix_ice_categories(storage_path, '../coarse_1974-2015.log', cpu_count=8)
+    # all_files_with_day_artifact(storage_path='/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/refined_grid/**')
+    fix_files_with_day_artifact(storage_path='/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/refined_grid/**')
