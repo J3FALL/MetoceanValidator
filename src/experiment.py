@@ -104,7 +104,7 @@ class Experiment:
             errors_for_day = [day.ice.check_for_integrity(),
                               day.tracers.check_for_integrity(),
                               day.currents.check_for_integrity()]
-            total = self._errors_in_total(errors_for_day)
+            total = _errors_in_total(errors_for_day)
             errors.append(total)
             for error in total:
                 logging.error(error)
@@ -141,16 +141,11 @@ class Experiment:
                 else:
                     errors_for_day.append(integrity_error)
 
-            # errors_for_day = \
-            #     day.ice.check_variables() + day.tracers.check_variables() + day.currents.check_variables()
-            total = self._errors_in_total(errors_for_day)
+            total = _errors_in_total(errors_for_day)
             for error in total:
                 logging.error(error)
 
         return total
-
-    def _errors_in_total(self, errors_for_day):
-        return list(filter(lambda error: error if error is not "" else None, errors_for_day))
 
 
 class WRFExperiment:
@@ -231,14 +226,11 @@ class WRFExperiment:
         else:
             errors_for_year.append(integrity_error)
 
-        total = self._errors_in_total(errors_for_year)
+        total = _errors_in_total(errors_for_year)
         for error in total:
             logging.error(error)
 
         return total
-
-    def _errors_in_total(self, errors_for_day):
-        return list(filter(lambda error: error if error is not "" else None, errors_for_day))
 
 
 class WaveWatchExperiment:
@@ -325,11 +317,12 @@ class WaveWatchExperiment:
         else:
             errors_for_month.append(integrity_error)
 
-        total = self._errors_in_total(errors_for_month)
+        total = _errors_in_total(errors_for_month)
         for error in total:
             logging.error(error)
 
         return total
 
-    def _errors_in_total(self, errors_for_day):
-        return list(filter(lambda error: error if error is not "" else None, errors_for_day))
+
+def _errors_in_total(errors_for_day):
+    return list(filter(lambda error: error if error is not "" else None, errors_for_day))

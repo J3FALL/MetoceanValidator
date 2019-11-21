@@ -1,0 +1,51 @@
+date: "%Y%m%d"
+files:
+  ice:
+    name: "ARCTIC_1h_ice_grid_TUV_(\\d{8})-(\\d{8}).nc"
+    prefix: "ARCTIC_1h_ice_grid_TUV_"
+    suffix: ".nc"
+    vars:
+      - name: 'iceconc'
+        shapes:
+          - [24, 452, 406]
+      - name: 'icethic_cea'
+        shapes:
+          - [24, 452, 406]
+      - name: 'siconcat'
+        shapes:
+          - [24, 8, 452, 406]
+      - name: 'sithicat'
+        shapes:
+          - [24, 8, 452, 406]
+      - name: 'uice_ipa'
+        shapes:
+          - [24, 452, 406]
+      - name: 'vice_ipa'
+        shapes:
+          - [24, 452, 406]
+  tracers:
+    name: "ARCTIC_1h_T_grid_T_(\\d{8})-(\\d{8}).nc"
+    prefix: "ARCTIC_1h_T_grid_T_"
+    suffix: ".nc"
+    vars:
+      - name: 'sossheig'
+        shapes:
+          - [24, 452, 406]
+      - name: 'vosaline'
+        shapes:
+          - [24, 18, 452, 406]
+      - name: 'votemper'
+        shapes:
+          - [24, 18, 452, 406]
+
+  currents:
+    name: "ARCTIC_1h_UV_grid_UV_(\\d{8})-(\\d{8}).nc"
+    prefix: "ARCTIC_1h_UV_grid_UV_"
+    suffix: ".nc"
+    vars:
+      - name: 'vomecrty'
+        shapes:
+          - [24, 18, 452, 406]
+      - name: 'vozocrtx'
+        shapes:
+          - [24, 18, 452, 406]

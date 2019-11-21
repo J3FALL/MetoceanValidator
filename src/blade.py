@@ -11,26 +11,18 @@ from src.ftp import missed_years
 
 TEMP_DIR = "../temp_missed"
 
-# nemo14_dir = '/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/coarse_grid/'
-wrf_dir = '/home/hpc-rosneft/nfs/0_41/share_2/output_data/Output/Arctic/WRF/'
-ww3_dir = '/home/hpc-rosneft/nfs/0_41/share_2/ww3_data/output/'
-
-
-# nemo_tmp_dir = '/home/hpc-rosneft/nfs/0_41/share_2/NEMO-TEMP/'
-
 
 class BladeChecker:
-    def __init__(self, date_from, date_to, file_format):
-        self._storage_path = os.environ['STORAGE_PATH']
-        # self._storage_path = nemo_tmp_dir
+    def __init__(self, date_from, date_to, file_format, storage_path, log_file_path='../logs/errors.log'):
+        self.__storage_path = storage_path
         self._date_from = date_from
         self._date_to = date_to
         self.file_format = file_format
-        self.init_logging()
+        self.init_logging(log_file_path=log_file_path)
         self.experiment = ""
 
-    def init_logging(self):
-        logging.basicConfig(filename='../logs/errors.log', level=logging.INFO, filemode='w')
+    def init_logging(self, log_file_path):
+        logging.basicConfig(filename=log_file_path, level=logging.INFO, filemode='w')
 
     def check_nemo_files(self, mode="absence", summary=False):
         logging.info('Started')
@@ -61,19 +53,8 @@ class BladeChecker:
 
     def get_all_netcdf_files(self):
         files = []
-        # TODO: temporary solution, refactor this later
-        dirs = [str(year) for year in range(1964, 2016)]
-
-        for dir in dirs:
-            for file_name in glob.iglob(
-                    self._storage_path + f"L2-{dir}/*/*.nc", recursive=True):
-                files.append(file_name)
-            for file_name in glob.iglob(
-                    self._storage_path + f"L2-{dir}/*.nc", recursive=True):
-                files.append(file_name)
-
-        # for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
-        #     files.append(file_name)
+        for file_name in glob.iglob(self.__storage_path + "**/*.nc", recursive=True):
+            files.append(file_name)
 
         return files
 
@@ -146,7 +127,7 @@ class BladeChecker:
 
     def wrf_yearly_files(self):
         files = []
-        for file_name in glob.iglob(self._storage_path + "**/*.nc", recursive=True):
+        for file_name in glob.iglob(self.__storage_path + "**/*.nc", recursive=True):
             files.append(file_name)
 
         return files
@@ -178,7 +159,7 @@ class BladeChecker:
 
     def wave_watch_monthly_files(self):
         files = []
-        for file_name in glob.iglob(self._storage_path + '**/*.nc', recursive=True):
+        for file_name in glob.iglob(self.__storage_path + '**/*.nc', recursive=True):
             files.append(file_name)
 
         return files
@@ -216,3 +197,18 @@ class BladeChecker:
         with open('../logs/matching_errors.log', 'w') as file:
             for error in self.experiment.matching_log:
                 file.write(error + "\n")
+
+
+def _l2_local_files(storage_path, year_from=1964, year_to=2016):
+    files = []
+    dirs = [str(year) for year in range(year_from, year_to)]
+
+    for dir in dirs:
+        for file_name in glob.iglob(
+                storage_path + f"L2-{dir}/*/*.nc", recursive=True):
+            files.append(file_name)
+        for file_name in glob.iglob(
+                storage_path + f"L2-{dir}/*.nc", recursive=True):
+            files.append(file_name)
+
+    return files

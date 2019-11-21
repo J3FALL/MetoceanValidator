@@ -35,9 +35,9 @@ class NCFile:
                         errors.append(error)
 
                     # TODO: change magic constants with more smart calculations
-                    if self.check_for_nan(var, 200, 200):
-                        error = f"{var.name} variable has NaN-value at (200,200) point in {self.name}"
-                        errors.append(error)
+                    # if self.check_for_nan(var, 200, 200):
+                    #     error = f"{var.name} variable has NaN-value at (200,200) point in {self.name}"
+                    #     errors.append(error)
                 except KeyError:
                     error = "%s variable is not presented in %s" % (correct_var.name, self.name)
                     errors.append(error)

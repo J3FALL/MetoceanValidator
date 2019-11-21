@@ -52,7 +52,8 @@ def fix_time_variables(directory, file_to_fix, previous_file, time_dif=86400.0):
     copyfile(f'{directory}/{previous_file}', f'{directory}/{file_to_fix}')
     fixed_file = NetCDF(f'{directory}/{file_to_fix}', mode='r+')
 
-    for time_var in ['time_counter', 'time_instant', 'time_counter_bounds', 'time_counter_bounds']:
+    for time_var in ['time_counter', 'time_counter_bounds', 'time_centered',
+                     'time_centered_bounds', 'time_instant', 'time_instant_bounds']:
         if time_var not in fixed_file.variables:
             print(f'Variable {time_var} is not in {file_to_fix}')
         else:
@@ -290,8 +291,11 @@ def file_name_from_path(file_path):
 
 
 if __name__ == '__main__':
+    fix_corrupted_file(directory='hvat',
+                       file_to_fix='ARCTIC_1h_ice_grid_TUV_19750425-19750425.nc',
+                       previous_file='ARCTIC_1h_ice_grid_TUV_19750424-19750424.nc')
     # fix_missed_files_in_nfs(storage_path, '../coarse_1974-2015.log')
     # fix_missed_days_in_nfs(storage_path, '../coarse_1974-2015.log')
     # fix_ice_categories(storage_path, '../coarse_1974-2015.log', cpu_count=8)
     # all_files_with_day_artifact(storage_path='/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/refined_grid/**')
-    fix_files_with_day_artifact(storage_path='/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/refined_grid/**')
+    # fix_files_with_day_artifact(storage_path='/home/hpc-rosneft/nfs/110_31/NEMO-ARCT/refined_grid/**')
